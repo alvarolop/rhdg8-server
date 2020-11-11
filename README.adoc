@@ -56,7 +56,7 @@ To support modern data management requirements with rapid data processing, elast
 * *Rolling upgrades*. Upgrade your cluster without downtime for continuous, uninterrupted operations for remote users and applications.
 
 
-== RHDG Operator
+=== RHDG Operator
 
 
 
@@ -73,4 +73,10 @@ To support modern data management requirements with rapid data processing, elast
 
 == Useful links
 
-
+* https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/[RHDG 8.1 documentation].
+* https://infinispan.org/documentation[Upstream documentation].
+* https://access.redhat.com/articles/4933551[RHDG 8 Supported Configurations].
+* https://access.redhat.com/articles/4933371[RHDG 8 Component Details].
+* https://access.redhat.com/articles/4961121[RHDG 8 Maintenance Schedule].
+* https://access.redhat.com/support/policy/updates/jboss_notes/#p_rhdg[RHDG Product Update and Support Policy].
+* https://developers.redhat.com/blog/2020/10/15/securely-connect-quarkus-and-red-hat-data-grid-on-red-hat-openshift[Securely connect Quarkus and RHDG 8.1 on OCP].
