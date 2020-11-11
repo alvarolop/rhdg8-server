@@ -28,6 +28,30 @@ toc::[]
 
 == Introduction
 
+Red Hat® Data Grid is an in-memory, distributed, NoSQL datastore solution. Your applications can access, process, and analyze data at in-memory speed to deliver a superior user experience. 
+
+Red Hat Data Grid provides value as a standard architectural component in application infrastructures for a variety of real-world scenarios and use cases:
+
+* Data caching and transient data storage.
+* Primary data store.
+* Low latency compute grid.
+
+
+=== Features and benefits
+
+To support modern data management requirements with rapid data processing, elastic scalability, and high availability, Red Hat Data Grid offers: 
+
+* *NoSQL data store*. Provides simple, flexible storage for a variety of data without the constraints of a fixed data model.
+* *Apache Spark and Hadoop integration*. Offers full support as an in-memory data store for Apache Spark and Hadoop, with support for Spark resilient distributed datasets (RDDs) and Discretized Streams (Dstreams), as well as Hadoop I/O format.
+* *Rich querying*. Provides easy search for objects using values and ranges, without the need for key-based lookups or an object’s exact location. 
+* *Polyglot client and access protocol support*. Offers read/write capabilities that let applications written in multiple programming languages easily access and share data. Applications can access the data grid remotely, using REST, or Hot Rod—for Java™, C++, and .NET.
+* *Distributed parallel execution*. Quickly process large volumes of data and support long-running compute applications using simplified Map-Reduce parallel operations.
+
+* *Flexible persistence*. Increase the lifespan of information in the memory for improved durability through support for both shared nothing and shared database—RDBMS or NoSQL—architectures.
+
+* *Cross-datacenter replication*. Replicate applications across datacenters and achieve high availability to meet service-level agreement (SLA) requirements for data within and across datacenters.
+
+* *Rolling upgrades*. Upgrade your cluster without downtime for continuous, uninterrupted operations for remote users and applications.
 
 
 == RHDG Operator
