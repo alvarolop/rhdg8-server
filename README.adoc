@@ -49,6 +49,8 @@ To support modern data management requirements with rapid data processing, elast
 
 * *Flexible persistence*. Increase the lifespan of information in the memory for improved durability through support for both shared nothing and shared database—RDBMS or NoSQL—architectures.
 
+* *Comprehensive security*. Authentication, role-based authorization, and access control are integrated with existing security and identity structures to give only trusted users, services, and applications access to the data grid.
+
 * *Cross-datacenter replication*. Replicate applications across datacenters and achieve high availability to meet service-level agreement (SLA) requirements for data within and across datacenters.
 
 * *Rolling upgrades*. Upgrade your cluster without downtime for continuous, uninterrupted operations for remote users and applications.
