@@ -64,6 +64,10 @@ To upgrade Data Grid clusters, Data Grid Operator checks the version of the imag
 On Red Hat OpenShift, the Operator Lifecycle Manager (OLM) enables upgrades for Data Grid Operator. 
 
 
+
+
+
+
 == Deploying RHDG on RHEL
 
 This section explains how to configure, run, and monitor Data Grid servers. RHDG server is available on the RH https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=data.grid&downloadType=distributions[downloads website]. 
@@ -81,7 +85,8 @@ cd ~/Downloads
 unzip redhat-datagrid-8.1.0-server.zip
 ----
 
-.Launch the server running the script
+
+.Launch the server
 [source, bash]
 ----
 ./redhat-datagrid-8.1.0-server/bin/server.sh 
@@ -95,25 +100,51 @@ unzip redhat-datagrid-8.1.0-server.zip
 
 === Running RHDG locally in clustering mode
 
-Unzip the RHDG server as in the previous example and duplicate the server folder to use one with each deployment. For example:
+Unzip the RHDG server as in the previous example and duplicate the server folder to use one with each deployment. 
 
+.Unzip the server
 [source, bash]
 ----
-
-
+cd ~/Downloads
+unzip redhat-datagrid-8.1.0-server.zip
 ----
 
-
-
+.Duplicate the server config
 [source, bash]
 ----
-./redhat-datagrid-8.1.0-server/bin/server.sh --server-root=redhat-datagrid-8.1.0-server/server1 --port-offset=0
-./redhat-datagrid-8.1.0-server/bin/server.sh --server-root=redhat-datagrid-8.1.0-server/server2 --port-offset=100
+cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-01
+cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
 ----
 
+
+.Launch both server instances
+[source, bash]
+----
+./redhat-datagrid-8.1.0-server/bin/server.sh --node-name=node-01 --server-root=redhat-datagrid-8.1.0-server/server-01 --port-offset=0
+./redhat-datagrid-8.1.0-server/bin/server.sh --node-name=node-02 --server-root=redhat-datagrid-8.1.0-server/server-02 --port-offset=100
+----
+
+After running both commands, you will similar logs to these in both terminals:
+[source, bash]
+----
+[...]
+20:19:29,614 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
+20:19:29,614 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.1.0.GA started in 5585ms
+20:19:36,637 INFO  (jgroups-8,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
+20:19:36,647 INFO  (jgroups-8,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
+20:19:37,365 INFO  (jgroups-5,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
+[...]
+20:19:38,463 INFO  (jgroups-5,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
+----
 
 
 == Deploying RHDG on OCP using the Operator
+
+Install Data Grid Operator into a OpenShift namespace to create and manage Data Grid clusters.
+
+
+
+
 
 
 
