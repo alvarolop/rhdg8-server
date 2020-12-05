@@ -144,7 +144,7 @@ An Operator is a method of packaging, deploying and managing a Kubernetes-native
 
 Install Data Grid Operator into a OpenShift namespace to create and manage Data Grid clusters.
 
-=== Deploy the RHDG 8 operator
+=== Deploying the RHDG operator
 
 Create subscriptions to Data Grid Operator on OpenShift so you can install different Data Grid versions and receive automatic updates.
 
@@ -180,7 +180,7 @@ oc process -f templates/rhdg-operator.yaml -p OPERATOR_NAMESPACE="other-namespac
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
 
 
-=== Deploy a RHDG 8 cluster
+=== Deploying a RHDG cluster
 
 Data Grid Operator lets you create, configure, and manage Data Grid clusters. Data Grid Operator adds a new Custom Resource (CR) of type Infinispan that lets you handle Data Grid clusters as complex units on OpenShift.
 
@@ -209,7 +209,7 @@ oc process -f templates/rhdg-cluster.yaml -p CLUSTER_NAMESPACE="another-namespac
 ----
 
 
-=== Configure RHDG monitoring using Prometheus
+=== Monitoring RHDG with Prometheus
 
 
 
