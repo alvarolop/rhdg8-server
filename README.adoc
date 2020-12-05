@@ -140,12 +140,80 @@ After running both commands, you will similar logs to these in both terminals:
 
 == Deploying RHDG on OCP using the Operator
 
+An Operator is a method of packaging, deploying and managing a Kubernetes-native application. A Kubernetes-native application is an application that is both deployed on Kubernetes and managed using the Kubernetes APIs and kubectl tooling.
+
 Install Data Grid Operator into a OpenShift namespace to create and manage Data Grid clusters.
 
+=== Deploy the RHDG 8 operator
+
+Create subscriptions to Data Grid Operator on OpenShift so you can install different Data Grid versions and receive automatic updates.
+
+To deploy the RHDG operator, you will need to create three different objects:
+
+* Two *Openshift projects* that will contain the operator and the objects of the RHDG cluster.
+
+* An *OperatorGroup*, which configures all Operators deployed in the same namespace as the OperatorGroup object to watch for their custom resource (CR) in a list of namespaces or cluster-wide. Basically, you will need one in your namespace because you are not creating the operator one of the default Openshift projects, such as `openshift-operators`.
+
+* A *Subscription*, which represents an intention to install an Operator. It is the custom resource that relates an Operator to a CatalogSource. Subscriptions describe which channel of an Operator package to subscribe to, and whether to perform updates automatically or manually. 
+
+I have created an OCP template to quickly deploy this operator. Just execute the following command have it up and running on your cluster. 
+
+IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy an operator, as it is necessary to create cluster-wide CRDs (Custom Resource Definitions).
+
+[source, bash]
+----
+oc process -f templates/rhdg-operator.yaml | oc apply -f -
+----
+
+This template provides two parameters to modify the project where the operator and the cluster is installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
+
+* *OPERATOR_NAMESPACE* = `rhdg8-operator`
+* *CLUSTER_NAMESPACE* = `rhdg8`
+
+Modify them just passing arguments to the template:
+
+[source, bash]
+----
+oc process -f templates/rhdg-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
+----
+
+It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
+
+
+=== Deploy a RHDG 8 cluster
+
+Data Grid Operator lets you create, configure, and manage Data Grid clusters. Data Grid Operator adds a new Custom Resource (CR) of type Infinispan that lets you handle Data Grid clusters as complex units on OpenShift.
+
+Data Grid Operator watches for Infinispan Custom Resources (CR) that you use to instantiate and configure Data Grid clusters and manage OpenShift resources, such as StatefulSets and Services. In this way, the Infinispan CR is your primary interface to Data Grid on OpenShift.
+
+
+I have created an OCP template to quickly deploy a basic RHDG cluster with 3 replicas. Execute the following command have it up and running on your cluster. 
+
+
+[source, bash]
+----
+oc process -f templates/rhdg-cluster.yaml | oc apply -f -
+----
+
+This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
+
+* *CLUSTER_NAMESPACE* = `rhdg8`
+* *CLUSTER_NAME* = `rhdg`
+
+
+Modify them just passing arguments to the template:
+
+[source, bash]
+----
+oc process -f templates/rhdg-cluster.yaml | oc apply -f -
+----
+
+
+=== Configure cluster's caches
 
 
 
-
+=== Configure RHDG monitoring using Prometheus
 
 
 

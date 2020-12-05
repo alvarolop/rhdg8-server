@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: rhdg8-cluster
+  annotations:
+    description: Template to deploy a RHDG cluster on OCP.
+    tags: infinispan,datagrid,operator
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData: 
+    identities.yaml: |-     
+      credentials:
+      - username: developer
+        password: developer
+      - username: operator
+        password: operator
+- apiVersion: infinispan.org/v1
+  kind: Infinispan
+  metadata:
+    name: ${CLUSTER_NAME}
+    namespace: ${CLUSTER_NAMESPACE}
+    labels:
+      type: middleware
+  spec:
+    affinity:
+      nodeAffinity:
+      podAffinity:
+      podAntiAffinity:
+    # autoscale:
+    #   disabled:
+    #   maxMemUsagePercent:
+    #   maxReplicas:
+    #   minMemUsagePercent:
+    #   minReplicas:
+    container:
+      cpu: '2'
+      extraJvmOpts: ''
+      memory: 3Gi
+    expose: 
+      annotations: {}
+      # host:
+      # nodePort:
+      type: Route
+    # image:
+    logging:
+      categories: {}
+      # categories:
+      #   org.infinispan: debug
+      #   org.jgroups: debug
+    replicas: 3
+    security:
+    #   endpointEncryption:
+    #     certSecretName:
+    #     certServiceName:
+    #     type: Secret
+      endpointSecretName: ${CLUSTER_NAME}-credentials
+    service:
+      container:
+        ephemeralStorage:
+        storage: ''
+        storageClassName:
+      replicationFactor: 2
+      # sites:
+      #   local:
+      #     expose:
+      #       annotations: {}
+      #       host:
+      #       nodePort:
+      #       type:
+      #     name:
+      #   locations:
+      #     - host:
+      #       name:
+      #       port:
+      #       secretName:
+      #       url:
+      type: DataGrid
+# - apiVersion: infinispan.org/v2alpha1
+#   kind: Cache
+#   metadata:
+#     name: ${CLUSTER_NAME}-replicated
+#     namespace: ${CLUSTER_NAMESPACE}
+#     labels:
+#       type: middleware
+#   spec:
+#     adminAuth:
+#       # password:
+#       secretName: basic-auth
+#       # username:
+#     clusterName: ${CLUSTER_NAME}
+#     name: ${CLUSTER_NAME}-replicated-01
+#     template: >-
+#       <infinispan> <cache-container> <distributed-cache name="doesnotapply" owners="1" mode="ASYNC"
+#       statistics="true"> <state-transfer enabled="false"/> <memory>   <binary
+#       eviction="MEMORY" size="400000000"/> <!-- 400 MB --> </memory> <expiration
+#       lifespan="600000"/> <!-- 10 min --> </distributed-cache> </cache-container></infinispan>
+#     # templateName:
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8"
+- name: CLUSTER_NAME
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "rhdg"
