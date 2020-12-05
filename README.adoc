@@ -209,11 +209,14 @@ oc process -f templates/rhdg-cluster.yaml | oc apply -f -
 ----
 
 
+=== Configure RHDG monitoring using Prometheus
+
+
+
 === Configure cluster's caches
 
 
 
-=== Configure RHDG monitoring using Prometheus
 
 
 

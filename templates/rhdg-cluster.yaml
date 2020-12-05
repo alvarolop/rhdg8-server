@@ -85,26 +85,6 @@ objects:
       #       secretName:
       #       url:
       type: DataGrid
-# - apiVersion: infinispan.org/v2alpha1
-#   kind: Cache
-#   metadata:
-#     name: ${CLUSTER_NAME}-replicated
-#     namespace: ${CLUSTER_NAMESPACE}
-#     labels:
-#       type: middleware
-#   spec:
-#     adminAuth:
-#       # password:
-#       secretName: basic-auth
-#       # username:
-#     clusterName: ${CLUSTER_NAME}
-#     name: ${CLUSTER_NAME}-replicated-01
-#     template: >-
-#       <infinispan> <cache-container> <distributed-cache name="doesnotapply" owners="1" mode="ASYNC"
-#       statistics="true"> <state-transfer enabled="false"/> <memory>   <binary
-#       eviction="MEMORY" size="400000000"/> <!-- 400 MB --> </memory> <expiration
-#       lifespan="600000"/> <!-- 10 min --> </distributed-cache> </cache-container></infinispan>
-#     # templateName:
 parameters:
 - name: CLUSTER_NAMESPACE
   description: "The project where the RHDG cluster will be installed."
