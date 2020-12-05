@@ -205,7 +205,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f templates/rhdg-cluster.yaml | oc apply -f -
+oc process -f templates/rhdg-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 
