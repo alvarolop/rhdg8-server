@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: rhdg8-monitoring
+  annotations:
+    description: Template to configure the monitoring stack for a RHDG cluster on OCP.
+    tags: infinispan,datagrid,operator
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: cluster-monitoring-config
+    namespace: openshift-monitoring
+  data:
+    config.yaml: |
+      enableUserWorkload: true 
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-monitoring-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData:
+    username: prometheus
+    password: prometheus
+- apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+    labels:
+      k8s-app: prometheus
+    name: datagrid-${CLUSTER_NAME}-monitoring
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+    endpoints:
+      - targetPort: 11222 
+        path: /metrics 
+        honorLabels: true
+        basicAuth:
+          username:
+            key: username
+            name: ${CLUSTER_NAME}-monitoring-credentials
+          password:
+            key: password
+            name: ${CLUSTER_NAME}-monitoring-credentials
+        interval: 30s
+        scrapeTimeout: 10s
+        scheme: https 
+        tlsConfig:
+          insecureSkipVerify: true
+          serverName: ${CLUSTER_NAME} 
+    namespaceSelector:
+      matchNames:
+        - ${CLUSTER_NAMESPACE} 
+    selector:
+      matchLabels:
+        app: infinispan-service
+        clusterName: ${CLUSTER_NAME}
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8"
+- name: CLUSTER_NAME
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "rhdg"

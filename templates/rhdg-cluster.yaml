@@ -24,6 +24,8 @@ objects:
         password: developer
       - username: operator
         password: operator
+      - username: prometheus
+        password: prometheus
 - apiVersion: infinispan.org/v1
   kind: Infinispan
   metadata:

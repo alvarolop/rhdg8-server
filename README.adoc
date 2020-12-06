@@ -211,6 +211,37 @@ oc process -f templates/rhdg-cluster.yaml -p CLUSTER_NAMESPACE="another-namespac
 
 === Monitoring RHDG with Prometheus
 
+Data Grid exposes a metrics endpoint that provides statistics and events to Prometheus.
+
+After installing OpenShift Container Platform 4.6, cluster administrators can optionally enable monitoring for user-defined projects. By using this feature, cluster administrators, developers, and other users can specify how services and pods are monitored in their own projects. You can then query metrics, review dashboards, and manage alerting rules and silences for your own projects in the OpenShift Container Platform web console. We are going to take advantage of this feature.
+
+
+.Enabling monitoring for user-defined projects
+WARNING: Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a Configmap of the `openshift-monitoring`. This modification has been added to the monitoring template. You need permissions to create and modify Configmaps in this project.
+
+
+
+I have created an OCP template to quickly configure metrics monitorization of a RHDG cluster. Execute the following command:
+
+[source, bash]
+----
+oc process -f templates/rhdg-monitoring.yaml | oc apply -f -
+----
+
+This template provides two parameters to modify the project where the cluster was installed and the name of the cluster itself. By default, values are: 
+
+* *CLUSTER_NAMESPACE* = `rhdg8`
+* *CLUSTER_NAME* = `rhdg`
+
+
+Modify them just passing arguments to the template:
+
+[source, bash]
+----
+oc process -f templates/rhdg-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+----
+
+
 
 
 === Configure cluster's caches
