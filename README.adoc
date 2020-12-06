@@ -85,6 +85,11 @@ cd ~/Downloads
 unzip redhat-datagrid-8.1.0-server.zip
 ----
 
+.Create the developer user
+[source, bash]
+----
+./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer
+----
 
 .Launch the server
 [source, bash]
@@ -114,6 +119,14 @@ unzip redhat-datagrid-8.1.0-server.zip
 ----
 cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-01
 cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
+----
+
+
+.Create the developer user in both instances
+[source, bash]
+----
+./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer --server-root=server-01
+./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer --server-root=server-02
 ----
 
 
@@ -312,6 +325,39 @@ For more information about the REST endpoint, check the https://access.redhat.co
 WARNING: This feature is Tech Preview as of December, 2020. Use it for development purposes only.
 
 
+
+
+
+== Annex: Setting up Grafana to visualize metrics
+
+It is possible to also install Grafana to have a better visualization of the metrics on OCP. To install it, we are going to use their Official Helm chart.
+
+[source, bash]
+----
+oc apply -f grafana/scc-grafana.yaml
+oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana
+----
+
+[source, bash]
+----
+cd grafana
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=rhdg8-test
+----
+
+
+Links:
+https://github.com/grafana/helm-charts
+https://github.com/m88i/nexus-operator/blob/main/README.md#openshift
+https://github.com/chrisob/openshift-user-workload-monitoring-grafana/blob/master/README.md
+
+
+Warning  FailedCreate  20m (x12 over 21m)     replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
+
+Warning  FailedCreate  10m (x7 over 20m)      replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be: 472 provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
+
+Warning  FailedCreate  2m56s (x9 over 2m58s)  replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [provider allow-grafana-userid-472: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be: 472 provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
 
 
 
