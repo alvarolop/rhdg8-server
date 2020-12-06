@@ -1,0 +1,22 @@
+{
+    "distributed-cache": {
+        "mode": "SYNC",
+        "owners": 1,
+        "partition-handling": {
+            "when-split": "ALLOW_READ_WRITES",
+            "merge-policy": "REMOVE_ALL"
+        },
+        "transaction": {
+            "mode": "NONE"
+        },
+        "memory": {
+            "off-heap": {
+            "size": 96468992,
+            "eviction": "MEMORY",
+            "strategy": "REMOVE"
+            }
+        },
+        "statistics": true
+    }
+}
+  
