@@ -10,14 +10,6 @@ metadata:
     openshift.io/support-url: https://access.redhat.com
 objects:
 - apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: cluster-monitoring-config
-    namespace: openshift-monitoring
-  data:
-    config.yaml: |
-      enableUserWorkload: true 
-- apiVersion: v1
   kind: Secret
   metadata:
     name: ${CLUSTER_NAME}-monitoring-credentials

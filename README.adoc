@@ -230,7 +230,15 @@ After installing OpenShift Container Platform 4.6, cluster administrators can op
 
 
 .Enabling monitoring for user-defined projects
-WARNING: Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a Configmap of the `openshift-monitoring`. This modification has been added to the monitoring template. You need permissions to create and modify Configmaps in this project.
+[WARNING]
+==== 
+Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a Configmap of the `openshift-monitoring`. You need permissions to create and modify Configmaps in this project.
+
+[source, bash]
+----
+oc apply -f templates/ocp-user-workload-monitoring.yaml
+----
+====
 
 
 
