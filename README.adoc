@@ -298,28 +298,35 @@ First define a cache using the JSON format. The following configuration is an ex
 }
 ----
 
+===== Configuration
+[source, bash]
+----
+CLUSTER_NAMESPACE="rhdg8"
+CLUSTER_NAME="rhdg"
+RHDG_URL=$(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')
+CACHE_NAME="distributed-rest-01"
+----
+
+===== Cache creation
 Create your cache using the following variables and the curl command:
 [source, bash]
 ----
-CLUSTER_NAMESPACE="rhdg8-test"
-CLUSTER_NAME="rhdg"
-CACHE_NAME="distributed-rest-01"
-curl -X POST -k -u developer:developer -H "Content-Type: application/json" $(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')/rest/v2/caches/${CACHE_NAME} --data-binary "@caches/distributed-01.json"
-----
 
+curl -X POST -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches/${CACHE_NAME} --data-binary "@caches/distributed-01.json"
+----
 
 Check if the cache was created successfully using the following command:
 [source,bash]
 ----
-curl -X GET -k -u developer:developer -H "Content-Type: application/json" $(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')/rest/v2/caches
+curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches
 ----
 
-
+===== Cache usage
 Perform gets and puts to check that the cache is working properly:
 [source,bash]
 ----
-curl -X POST -k -u developer:developer $(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')/rest/v2/caches/${CACHE_NAME}/0 --data "Hello World"
-curl -X GET -k -u developer:developer  $(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')/rest/v2/caches/${CACHE_NAME}/0
+curl -X POST -k -u developer:developer ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}/0 --data "Hello World"
+curl -X GET -k -u developer:developer  ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}/0
 ----
 
 
@@ -351,7 +358,7 @@ oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana
 cd grafana
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
-helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=rhdg8-test
+helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=rhdg8
 ----
 
 
