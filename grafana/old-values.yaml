@@ -1,0 +1,58 @@
+# Values for the grafana Helm chart
+# These are the default values: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md#configuration 
+adminUser: admin
+adminPassword: admin
+
+datasources: 
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: prometheus-user-workload
+      type: prometheus
+      access: proxy
+      url: http://prometheus-operated.openshift-user-workload-monitoring.svc:9090
+      withCredentials: false
+      isDefault: true
+
+downloadDashboardsImage: {}
+
+downloadDashboards: {}
+
+image:
+  repository: grafana/grafana
+  tag: 7.3.5
+
+ingress:
+  enabled: true
+  path: /
+  # hosts:
+    # - grafana.apps.apps.sandbox1365.opentlc.com
+
+# namespaceOverride: "alvaro-test"
+
+persistence:
+  type: pvc
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+
+service:
+  port: 8080
+  portName: external
+
+testFramework:
+  enabled: false
+
+
+
+
+
+
+
+
+
+
+
+
+
