@@ -175,7 +175,7 @@ IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy
 
 [source, bash]
 ----
-oc process -f templates/rhdg-operator.yaml | oc apply -f -
+oc process -f templates/rhdg-01-operator.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the operator and the cluster is installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
@@ -187,7 +187,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f templates/rhdg-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
+oc process -f templates/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
 ----
 
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
@@ -205,7 +205,7 @@ I have created an OCP template to quickly deploy a basic RHDG cluster with 3 rep
 
 [source, bash]
 ----
-oc process -f templates/rhdg-cluster.yaml | oc apply -f -
+oc process -f templates/rhdg-02-cluster.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
@@ -218,7 +218,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f templates/rhdg-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f templates/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 
@@ -236,7 +236,7 @@ Monitoring of user-defined projects is not enabled by default. To enable it, you
 
 [source, bash]
 ----
-oc apply -f templates/ocp-user-workload-monitoring.yaml
+oc apply -f templates/rhdg-02-ocp-user-workload-monitoring.yaml
 ----
 ====
 
@@ -246,7 +246,7 @@ I have created an OCP template to quickly configure metrics monitorization of a 
 
 [source, bash]
 ----
-oc process -f templates/rhdg-monitoring.yaml | oc apply -f -
+oc process -f templates/rhdg-03-monitoring.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster was installed and the name of the cluster itself. By default, values are: 
@@ -259,10 +259,57 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f templates/rhdg-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f templates/rhdg-03-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 For more information, access the Openshift https://docs.openshift.com/container-platform/4.6/monitoring/understanding-the-monitoring-stack.html[documentation] for the monitoring stack and the RHDG documenation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#prometheus[configure monitoring] for RHDG 8 on OCP.
+
+
+
+==== Monitoring RHDG 8 with Grafana
+
+A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
+
+Administrators are often looking to write custom queries and create custom dashboards in Grafana. However, Grafana instances provided with the monitoring stack (and its dashboards) are read-only.  To solve this problem, we can use the community-powered Grafana operator provided by OperatorHub.
+
+To deploy the community-powered Grafana operator on OCP 4.6 just follow these steps:
+
+===== Deploy the Grafana operator
+[source, bash]
+----
+oc process -f templates/grafana-01-operator.yaml | oc apply -f -
+----
+
+===== Create a Grafana instance
+Now, we will create a Grafana instance using the operator:
+[source, bash]
+----
+oc process -f templates/grafana-02-instance.yaml | oc apply -f -
+----
+
+===== Create a Grafana data source
+Now, we will create a Grafana data source:
+[source, bash]
+----
+oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount
+
+PROJECT=grafana-operator
+BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n ${PROJECT})
+
+oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN| oc apply -f -
+----
+
+===== Create a Grafana dashboard
+Now, we will create a Grafana dashboard:
+[source, bash]
+----
+#TODO: Please complete
+----
+
+
+
+
+
 
 
 === Configure cluster's caches
@@ -350,7 +397,7 @@ It is possible to also install Grafana to have a better visualization of the met
 [source, bash]
 ----
 oc apply -f grafana/scc-grafana.yaml
-oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana
+oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana -n alvaro-test
 ----
 
 [source, bash]
@@ -358,7 +405,7 @@ oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana
 cd grafana
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
-helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=rhdg8
+helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=alvaro-test
 ----
 
 
@@ -368,14 +415,27 @@ https://github.com/m88i/nexus-operator/blob/main/README.md#openshift
 https://github.com/chrisob/openshift-user-workload-monitoring-grafana/blob/master/README.md
 
 
-Warning  FailedCreate  20m (x12 over 21m)     replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
 
-Warning  FailedCreate  10m (x7 over 20m)      replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be: 472 provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
+*Basic error:*
+    Error creating: pods "rhdg-grafana-55fc5c69b6-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
 
-Warning  FailedCreate  2m56s (x9 over 2m58s)  replicaset-controller  Error creating: pods "rhdg-grafana-75446fccc8-" is forbidden: unable to validate against any security context constraint: [provider allow-grafana-userid-472: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be: 472 provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000850000, 1000859999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000850000, 1000859999]]
+    Error creating: pods "rhdg-grafana-d8d55bc96-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
+
+    Error creating: pods "rhdg-grafana-5b4cb949c4-" is forbidden: unable to validate against any security context constraint: [
+        provider restricted:
+         .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group 
+         spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] 
+         spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
+*Template* 
+    securityContext:
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
 
 
 
+
+    Error creating: pods "rhdg-grafana-55fc5c69b6-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999] spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
 
 
 == Useful links
