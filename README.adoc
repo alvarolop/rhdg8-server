@@ -266,7 +266,7 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 
 
-=== Monitoring RHDG 8 with Grafana
+=== Monitoring RHDG with Grafana
 
 A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
 
@@ -387,54 +387,6 @@ WARNING: This feature is Tech Preview as of December, 2020. Use it for developme
 
 
 
-
-
-== Annex: Setting up Grafana to visualize metrics
-
-It is possible to also install Grafana to have a better visualization of the metrics on OCP. To install it, we are going to use their Official Helm chart.
-
-[source, bash]
-----
-oc apply -f grafana/scc-grafana.yaml
-oc adm policy add-scc-to-user allow-grafana-userid-472 -z rhdg-grafana -n alvaro-test
-----
-
-[source, bash]
-----
-cd grafana
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
-helm install rhdg-grafana grafana/grafana -f values.yaml --set namespaceOverride=alvaro-test
-----
-
-
-Links:
-https://github.com/grafana/helm-charts
-https://github.com/m88i/nexus-operator/blob/main/README.md#openshift
-https://github.com/chrisob/openshift-user-workload-monitoring-grafana/blob/master/README.md
-
-
-
-*Basic error:*
-    Error creating: pods "rhdg-grafana-55fc5c69b6-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
-
-    Error creating: pods "rhdg-grafana-d8d55bc96-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
-
-    Error creating: pods "rhdg-grafana-5b4cb949c4-" is forbidden: unable to validate against any security context constraint: [
-        provider restricted:
-         .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group 
-         spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] 
-         spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
-*Template* 
-    securityContext:
-        runAsUser: 472
-        runAsGroup: 472
-        fsGroup: 472
-
-
-
-
-    Error creating: pods "rhdg-grafana-55fc5c69b6-" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{472}: 472 is not an allowed group spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999] spec.initContainers[0].securityContext.runAsUser: Invalid value: 0: must be in the ranges: [1000610000, 1000619999] spec.containers[0].securityContext.runAsUser: Invalid value: 472: must be in the ranges: [1000610000, 1000619999]]
 
 
 == Useful links
