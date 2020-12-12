@@ -266,7 +266,7 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 
 
-==== Monitoring RHDG 8 with Grafana
+=== Monitoring RHDG 8 with Grafana
 
 A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
 
@@ -274,20 +274,20 @@ Administrators are often looking to write custom queries and create custom dashb
 
 To deploy the community-powered Grafana operator on OCP 4.6 just follow these steps:
 
-===== Deploy the Grafana operator
+==== Deploy the Grafana operator
 [source, bash]
 ----
 oc process -f templates/grafana-01-operator.yaml | oc apply -f -
 ----
 
-===== Create a Grafana instance
+==== Create a Grafana instance
 Now, we will create a Grafana instance using the operator:
 [source, bash]
 ----
 oc process -f templates/grafana-02-instance.yaml | oc apply -f -
 ----
 
-===== Create a Grafana data source
+==== Create a Grafana data source
 Now, we will create a Grafana data source:
 [source, bash]
 ----
@@ -299,7 +299,7 @@ BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n ${PROJECT}
 oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN| oc apply -f -
 ----
 
-===== Create a Grafana dashboard
+==== Create a Grafana dashboard
 Now, we will create a Grafana dashboard:
 [source, bash]
 ----
