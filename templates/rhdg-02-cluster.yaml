@@ -34,10 +34,31 @@ objects:
     labels:
       type: middleware
   spec:
-    affinity:
-      nodeAffinity:
-      podAffinity:
-      podAntiAffinity:
+    # affinity:
+    #   nodeAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - preference:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution: 
+    #       nodeSelectorTerms:
+    #         - matchExpressions:
+    #           matchFields:
+    #   podAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - podAffinityTerm:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #         namespaces:
+    #         topologyKey:
+    #   podAntiAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - podAffinityTerm:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #         namespaces:
+    #         topologyKey:
     # autoscale:
     #   disabled:
     #   maxMemUsagePercent:
@@ -53,7 +74,7 @@ objects:
       # host:
       # nodePort:
       type: Route
-    # image:
+    # image: "infinispan/server:12.0"
     logging:
       categories: {}
       # categories:
@@ -67,10 +88,10 @@ objects:
     #     type: Secret
       endpointSecretName: ${CLUSTER_NAME}-credentials
     service:
-      container:
-        ephemeralStorage:
-        storage: ''
-        storageClassName:
+      # container:
+      #   ephemeralStorage:
+      #   storage: ''
+      #   storageClassName:
       replicationFactor: 2
       # sites:
       #   local:
