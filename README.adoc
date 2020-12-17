@@ -313,7 +313,7 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 
 
-== Annex: Monitoring logs from several pods at the same time
+== Annex: Stern - Tail logs from multiple pods
 
 In some situations, you will need to monitor logs from several pods of the same application and maybe you want to check to which pod did the request arrived. https://github.com/wercker/stern[Stern] allows you to tail multiple pods on Kubernetes and multiple containers within the pod. Each result is color coded for quicker debugging.
 
