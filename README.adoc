@@ -313,8 +313,20 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 
 
+== Annex: Monitoring logs from several pods at the same time
 
+In some situations, you will need to monitor logs from several pods of the same application and maybe you want to check to which pod did the request arrived. https://github.com/wercker/stern[Stern] allows you to tail multiple pods on Kubernetes and multiple containers within the pod. Each result is color coded for quicker debugging.
 
+First, you will need to install it on your machine. After that, log in to your cluster and monitoring the previous deployment is as simple as executing the following command:
+
+[source, bash]
+----
+stern --namespace=$CLUSTER_NAMESPACE -l clusterName=$CLUSTER_NAME
+----
+
+The previous command will show all the logs from all the pods from a namespace that contain a given label. 
+
+There are many filters and configuration options. Check the https://github.com/wercker/stern#cli-flags[documentation] for a full list of them
 
 
 
@@ -336,74 +348,7 @@ It is also possible to install the operator from the web console. For more infor
 
 
 
-== Annex: Managing SSL certificates from the client side
 
-There are two options to manage SSL configuration for the Java HotRod client.
-
-=== Option 1: Default configuration using operator
-
-First option is to use the default configuration. This is the recommended configuration.
-
-* The RHDG operator provides certificates by default in a secret with name `${RHDG_CLUSTER_NAME}-cert-secret`.
-* The Infinispan Spring Starter accepts a certificate in `.pem` format and builds an in-memory KeyStore with all the certificates found under a path provided.
-* The `infinispan-client-hotrod` library provides similar functionality.
-
-Add the following lines to your `application.properties` to configure Infinispan Spring Starter:
-[source, bash]
-----
-infinispan.remote.use-ssl=true
-infinispan.remote.trust-store-path=config/tls.crt
-infinispan.remote.sni-host-name=${RHDG_CLUSTER_NAME}.${CLUSTER_NAMESPACE}.svc
-----
-
-Add the following lines to your `application.properties` to configure infinispan-client-hotrod:
-[source, bash]
-----
-infinispan.client.hotrod.use_ssl=true
-infinispan.client.hotrod.trust_store_path=config/tls.crt
-infinispan.client.hotrod.sni_host_name=${RHDG_CLUSTER_NAME}.${CLUSTER_NAMESPACE}.svc
-----
-
-For more information about configuration parameters check the following resources:
-
-* https://access.redhat.com/webassets/avalon/d/red-hat-data-grid/8.1/api/org/infinispan/client/hotrod/configuration/package-summary.html[RHDG 8.1 JavaDoc].
-* https://github.com/infinispan/infinispan-spring-boot/blob/master/infinispan-spring-boot-starter-remote/src/test/resources/test-application.properties[Testing configuration of the Spring Starter].
-
-
-=== Option 2: Custom truststore using openssl
-
-The second option is useful when you want custom certificates or you would like to access RHDG from outside your cluster.
-
-The following commands are inspired in the https://github.com/infinispan/infinispan-image-artifacts/blob/9f028ddc1f5e26084b0b0edf46feb11ff3df2570/config-generator/src/main/groovy/org/infinispan/images/ConfigGenerator.groovy#L74-L77[code executed by the RHDG operator] to build SSL configuration from the server side.
-
-
-[source, bash]
-----
-# Some variables
-export CLUSTER_NAME=rhdg
-export PCKS12_PASSWORD=changeit
-export PCKS12_ALIAS=rhdg
-
-# Get both tls elements in .pem format 
-oc get secret ${CLUSTER_NAME}-cert-secret -o jsonpath='{.data.tls\.key}' | base64 --decode > server.pem
-oc get secret ${CLUSTER_NAME}-cert-secret -o jsonpath='{.data.tls\.crt}' | base64 --decode >> server.pem
-
-# Create the PKCS file
-openssl pkcs12 -export -passout env:PCKS12_PASSWORD -inkey tls.key -in tls.crt -name $PCKS12_ALIAS -out keystore.pkcs12
-# Check that it worked
-openssl pkcs12 -nokeys -info -in keystore.pkcs12 -passin pass:${PCKS12_PASSWORD}
-
-# Convert to JKS
-keytool -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore truststore.jks -deststoretype JKS -srcstorepass ${PCKS12_PASSWORD} -storepass ${PCKS12_PASSWORD}
-# Create secret with the .jks file
-oc create secret generic rhdg-client-truststore-secret --from-file=truststore.jks
-----
-
-After that, you would need to mount the `.jks` into the container and configure the JKS truststore (Similar as done in the previous option).
-
-=== Option 3: initContainers
-
-There is another option that I will document, but it is explained https://developers.redhat.com/blog/2017/11/22/dynamically-creating-java-keystores-openshift/[here]. This is an elegant solution for applications that use SSL but do not accept certificates in `.pem` format. The downside is that you are forced to use some kind of persistence.
 
 
 
