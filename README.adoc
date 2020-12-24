@@ -303,8 +303,24 @@ oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN
 Now, we will create a Grafana dashboard:
 [source, bash]
 ----
-#TODO: Please complete
+DASHBOARD_NAME="grafana-dashboard-rhdg8"
+# Create a configMap containing the Dashboard
+oc create configmap $DASHBOARD_NAME --from-file=dashboard=grafana/$DASHBOARD_NAME.json -n $PROJECT
+# Create a Dashboard object that automatically updates Grafana
+oc process -f templates/grafana-04-dashboard.yaml -p DASHBOARD_NAME=$DASHBOARD_NAME | oc apply -f -
 ----
+
+
+
+==== Access Grafana as admin
+
+After accessing Grafana using the OCP SSO, you may log in as admin. Retrieve the credentials from the secret using the following commands:
+[source, bash]
+----
+oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode
+oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' | base64 --decode
+----
+
 
 
 For more information, access the Grafana https://grafana.com/docs/grafana/latest/[main documentation] or the Grafana https://github.com/integr8ly/grafana-operator/blob/v3.6.0/README.md[operator documentation].
