@@ -14,6 +14,8 @@ objects:
   metadata:
     name: prometheus-grafana-datasource
     namespace: ${OPERATOR_NAMESPACE}
+    labels:
+      app: grafana
   spec:
     datasources:
       - access: proxy

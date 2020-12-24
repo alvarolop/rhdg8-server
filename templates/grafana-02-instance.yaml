@@ -60,6 +60,8 @@ objects:
   metadata:
     name: grafana-oauth
     namespace: ${OPERATOR_NAMESPACE}
+    labels:
+      app: grafana
   spec:
     config:
       log:
