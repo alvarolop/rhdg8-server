@@ -240,6 +240,11 @@ oc apply -f templates/rhdg-02-ocp-user-workload-monitoring.yaml
 ----
 ====
 
+// In order to access the Prometheus that will contain the metrics of DG, expose its service:
+// [source, bash]
+// ----
+// oc expose svc/prometheus-user-workload -n openshift-user-workload-monitoring
+// ----
 
 
 I have created an OCP template to quickly configure metrics monitorization of a RHDG cluster. Execute the following command:

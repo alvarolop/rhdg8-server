@@ -25,9 +25,11 @@ objects:
   metadata:
     labels:
       k8s-app: prometheus
+      jirakey: one
     name: datagrid-${CLUSTER_NAME}-monitoring
     namespace: ${CLUSTER_NAMESPACE}
   spec:
+# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor
     endpoints:
       - targetPort: 11222 
         path: /metrics 
@@ -45,6 +47,13 @@ objects:
         tlsConfig:
           insecureSkipVerify: true
           serverName: ${CLUSTER_NAME} 
+# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+        # metricRelabelings:
+        #   - sourceLabels: [clusterName]
+        #     targetLabel: bu_code
+        #     regex: (.*)
+        #     replacement: ${1}
+        #     action: replace
     namespaceSelector:
       matchNames:
         - ${CLUSTER_NAMESPACE} 
@@ -52,6 +61,8 @@ objects:
       matchLabels:
         app: infinispan-service
         clusterName: ${CLUSTER_NAME}
+    targetLabels:
+      - clusterName
 parameters:
 - name: CLUSTER_NAMESPACE
   description: "The project where the RHDG cluster will be installed."
