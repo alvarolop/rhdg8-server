@@ -106,7 +106,7 @@ unzip redhat-datagrid-8.1.0-server.zip
 
 === Running RHDG locally in clustering mode
 
-Unzip the server as in the previous example then locate the folder named `server`, duplicate it and use one with each server instance. 
+Unzip the server as in the previous example, locate the folder named `server`, duplicate it then use one with each server instance. 
 
 .Unzip the server
 [source, bash]
@@ -138,7 +138,7 @@ cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
 ./redhat-datagrid-8.1.0-server/bin/server.sh --node-name=node-02 --server-root=redhat-datagrid-8.1.0-server/server-02 --port-offset=100
 ----
 
-After running both commands, you will similar logs to these in both terminals:
+After running both commands, you will see in both terminals similar logs to the ones shown below:
 [source, bash]
 ----
 [...]
