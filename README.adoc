@@ -71,13 +71,13 @@ On OpenShift, the Operator Lifecycle Manager (OLM) enables upgrades for Data Gri
 
 == Deploying RHDG on RHEL
 
-This section explains how to configure, run, and monitor Data Grid servers. RHDG server is available on the RH https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=data.grid&downloadType=distributions[downloads website]. 
+This section explains how to configure, run, and monitor Data Grid servers. The binaries are available on the RH https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=data.grid&downloadType=distributions[downloads website]. 
 
 
 
 === Running RHDG locally in standalone mode
 
-This is the basic installation option, valid for basic exploration and development purposes. Follow this steps to run the server in this mode:
+This is the basic installation option, valid for basic exploration and development purposes. Follow these steps to run the server in this mode:
 
 .Unzip the server
 [source, bash]
@@ -106,7 +106,7 @@ unzip redhat-datagrid-8.1.0-server.zip
 
 === Running RHDG locally in clustering mode
 
-Unzip the RHDG server as in the previous example and duplicate the server folder to use one with each deployment. 
+Unzip the server as in the previous example and duplicate the `server` folder to use one with each deployment. 
 
 .Unzip the server
 [source, bash]
