@@ -58,10 +58,11 @@ To support modern data management requirements with rapid data processing, elast
 
 === RHDG Operator
 
-The Data Grid Operator provides operational intelligence and reduces management complexity for deploying Data Grid on OpenShift. Data Grid Operator automatically upgrades Data Grid clusters when new versions become available.
+The Data Grid Operator provides operational intelligence and reduces management complexity for deploying Data Grid on OpenShift, automatically upgrading clusters when new image versions become available.
 
-To upgrade Data Grid clusters, Data Grid Operator checks the version of the image for Data Grid nodes. If Data Grid Operator determines that a new version of the image is available, it gracefully shuts down all nodes, applies the new image, and then restarts the nodes.
-On Red Hat OpenShift, the Operator Lifecycle Manager (OLM) enables upgrades for Data Grid Operator. 
+In order to upgrade Data Grid clusters, the operator checks the version of the image of each Data Grid node. If the operator determines that a new version of the image is available, it gracefully shuts down all nodes, applies the new image, and restarts the nodes.
+
+On OpenShift, the Operator Lifecycle Manager (OLM) enables upgrades for Data Grid Operator. 
 
 
 
