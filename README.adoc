@@ -21,7 +21,7 @@ ifndef::env-github[]
 endif::[]
 // End: Enable admonition icons
 
-This repository demonstrates some of the basic features of the latest release of Red Hat Data Grid 8 and how to deploy a RHDG cluster on OCP and RHEL. 
+This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster on OCP and RHEL. 
 
 // Create the Table of contents here
 toc::[]
@@ -296,12 +296,11 @@ oc process -f templates/grafana-02-instance.yaml | oc apply -f -
 Now, we will create a Grafana data source:
 [source, bash]
 ----
-oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount
+PROJECT=grafana
 
-PROJECT=grafana-operator
+oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount -n ${PROJECT}
 BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n ${PROJECT})
-
-oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN| oc apply -f -
+oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=${BEARER_TOKEN} | oc apply -f -
 ----
 
 ==== Create a Grafana dashboard
