@@ -106,7 +106,7 @@ unzip redhat-datagrid-8.1.0-server.zip
 
 === Running RHDG locally in clustering mode
 
-Unzip the server as in the previous example. Then, locate the folder named `server`, duplicate it, and use one with each server instance. 
+Unzip the server as in the previous example, then locate the folder named `server`, duplicate it, and use one with each server instance. 
 
 .Unzip the server
 [source, bash]
