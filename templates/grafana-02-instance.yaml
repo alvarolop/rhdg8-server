@@ -135,4 +135,4 @@ parameters:
 - name: OPERATOR_NAMESPACE
   description: "The project where the operator will be installed."
   required: false
-  value: "grafana-operator"
+  value: "grafana"
