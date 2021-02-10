@@ -223,6 +223,52 @@ oc process -f templates/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-names
 ----
 
 
+=== Creating RHDG caches using the Operator CRD
+
+WARNING: Creating caches with Data Grid Operator is available as a technology preview. If you want to create caches in a production environment, I encourage you to use the REST or Java alternatives.
+
+
+Data Grid stores entries into caches, which can be created using several methods: REST, CLI, programmatically using the Java Client or using the `Cache` CRD. In this section, we will explore how to create caches using the Operator.
+
+
+NOTE: For other ways of creating caches, please check this other https://github.com/alvarolop/rhdg8-client#cache-configuration[Git repository] with information about the Data Grid client.
+
+To create caches with Data Grid Operator, you use Cache CRs to add caches from templates or XML configuration. Bear in mind the following contrains:
+
+* You can create a single cache for each `Cache` CR.
+* If you edit caches in the OpenShift Web Console, changes do not take effect on the Data Grid cluster. You must delete the CR and create it again with the new configuration.
+* Deleting Cache CRs in the OpenShift Web Console, does not remove caches from Data Grid clusters. You must delete caches through the console or CLI.
+
+
+I have created an OCP template to quickly set up two caches on the RHDG cluster:
+
+* `operator-cache-01`: Based on an xml configuration.
+* `operator-cache-02`: Based on an already defined templated.
+
+
+In order to apply this template, just execute the following command:
+[source, bash]
+----
+oc process -f templates/rhdg-03-caches.yaml | oc apply -f -
+----
+
+This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
+
+* *CLUSTER_NAMESPACE* = `rhdg8`
+* *CLUSTER_NAME* = `rhdg`
+
+
+Modify them just passing arguments to the template:
+
+[source, bash]
+----
+oc process -f templates/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+----
+
+
+For more information about how to create caches using the CRD, please check the https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#creating_caches_operator-caches[official documentation].
+
+
 === Monitoring RHDG with Prometheus
 
 Data Grid exposes a metrics endpoint that provides statistics and events to Prometheus.
@@ -252,7 +298,7 @@ I have created an OCP template to quickly configure metrics monitorization of a 
 
 [source, bash]
 ----
-oc process -f templates/rhdg-03-monitoring.yaml | oc apply -f -
+oc process -f templates/rhdg-04-monitoring.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster was installed and the name of the cluster itself. By default, values are: 
@@ -265,14 +311,14 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f templates/rhdg-03-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f templates/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 For more information, access the Openshift https://docs.openshift.com/container-platform/4.6/monitoring/understanding-the-monitoring-stack.html[documentation] for the monitoring stack and the RHDG documenation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#prometheus[configure monitoring] for RHDG 8 on OCP.
 
 
 
-=== Monitoring RHDG with Grafana
+== Monitoring RHDG with Grafana
 
 A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
 
@@ -280,20 +326,20 @@ Administrators are often looking to write custom queries and create custom dashb
 
 To deploy the community-powered Grafana operator on OCP 4.6 just follow these steps:
 
-==== Deploy the Grafana operator
+=== Deploy the Grafana operator
 [source, bash]
 ----
 oc process -f templates/grafana-01-operator.yaml | oc apply -f -
 ----
 
-==== Create a Grafana instance
+=== Create a Grafana instance
 Now, we will create a Grafana instance using the operator:
 [source, bash]
 ----
 oc process -f templates/grafana-02-instance.yaml | oc apply -f -
 ----
 
-==== Create a Grafana data source
+=== Create a Grafana data source
 Now, we will create a Grafana data source:
 [source, bash]
 ----
@@ -304,7 +350,7 @@ BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n ${PROJECT}
 oc process -f templates/grafana-03-datasource.yaml -p BEARER_TOKEN=${BEARER_TOKEN} | oc apply -f -
 ----
 
-==== Create a Grafana dashboard
+=== Create a Grafana dashboard
 Now, we will create a Grafana dashboard:
 [source, bash]
 ----
@@ -317,7 +363,7 @@ oc process -f templates/grafana-04-dashboard.yaml -p DASHBOARD_NAME=$DASHBOARD_N
 
 
 
-==== Access Grafana as admin
+=== Access Grafana as admin
 
 After accessing Grafana using the OCP SSO, you may log in as admin. Retrieve the credentials from the secret using the following commands:
 [source, bash]

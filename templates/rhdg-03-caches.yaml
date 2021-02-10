@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: rhdg8-caches
+  annotations:
+    description: Template to configure caches inside a RHDG cluster on OCP.
+    tags: infinispan,datagrid,operator
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-caches-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData:
+    username: operator
+    password: operator
+- apiVersion: infinispan.org/v2alpha1
+  kind: Cache
+  metadata:
+    name: ${CLUSTER_NAME}-operator-cache-01
+    namespace: ${CLUSTER_NAMESPACE}
+    labels:
+      type: middleware
+  spec:
+    adminAuth:
+      secretName: ${CLUSTER_NAME}-caches-credentials
+    clusterName: ${CLUSTER_NAME}
+    name:  operator-cache-01
+    template: >-
+      <infinispan>
+        <cache-container>
+          <distributed-cache name="doesnotapply" owners="1" mode="ASYNC" statistics="true">
+            <state-transfer enabled="false"/>
+            <memory>
+              <binary eviction="MEMORY" size="400000000"/> <!-- 400 MB -->
+            </memory>
+            <expiration lifespan="600000"/> <!-- 10 min -->
+          </distributed-cache>
+        </cache-container>
+      </infinispan>
+- apiVersion: infinispan.org/v2alpha1
+  kind: Cache
+  metadata:
+    name: ${CLUSTER_NAME}-operator-cache-02
+    namespace: ${CLUSTER_NAMESPACE}
+    labels:
+      type: middleware
+  spec:
+    adminAuth:
+      secretName: ${CLUSTER_NAME}-caches-credentials
+    clusterName: ${CLUSTER_NAME}
+    name:  operator-cache-02
+    templateName: org.infinispan.DIST_SYNC
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8"
+- name: CLUSTER_NAME
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "rhdg"
