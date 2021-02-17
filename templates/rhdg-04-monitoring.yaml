@@ -43,10 +43,10 @@ objects:
             name: ${CLUSTER_NAME}-monitoring-credentials
         interval: 30s
         scrapeTimeout: 10s
-        scheme: https 
-        tlsConfig:
-          insecureSkipVerify: true
-          serverName: ${CLUSTER_NAME} 
+        scheme: http 
+        # tlsConfig:
+        #   insecureSkipVerify: true
+        #   serverName: ${CLUSTER_NAME} 
 # Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
         # metricRelabelings:
         #   - sourceLabels: [clusterName]
