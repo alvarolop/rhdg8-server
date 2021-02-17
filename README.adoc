@@ -435,6 +435,41 @@ It is also possible to install the operator from the web console. For more infor
 
 
 
+== Annex: Deploying RHDG 8 without operator
+
+WARNING: Bear in mind that this template is for testing purposes and that the installation made with it will not benefit from any kind of Red Hat support.
+
+If you need to test any configuration that the operator does not provide, it is possible to deploy the RHDG cluster manually creating all the Openshift resources that the Operator manages automagically.
+
+By default, the template deploys a RHDG cluster named `rhdg` in the project `rhdg8-operatorless`. Deploy your cluster performing the following command:
+
+[source, bash]
+----
+oc process -f templates/rhdg-99-operatorless.yaml | oc apply -f -
+----
+
+
+Due to the limitation of OCP templates, if you want to change the cluster name and the namespace, you will have to edit lines #103, and #107 of the file `templates/rhdg-99-operatorless.yaml`. This is the pattern that you have to follow [Substitute the ENV_VARS with the correct values]:
+
+[source, yaml]
+----
+  data:
+    infinispan.yaml: |
+      clusterName: ${CLUSTER_NAME}
+      jgroups:
+        transport: tcp
+        dnsPing:
+          query: ${CLUSTER_NAME}-ping.${CLUSTER_NAMESPACE}.svc.cluster.local
+        diagnostics: false
+----
+
+After modifying the yaml, process the template with the correct params:
+
+[source, bash]
+----
+oc process -f templates/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+----
+
 
 
 
