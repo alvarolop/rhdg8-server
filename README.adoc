@@ -166,7 +166,9 @@ To deploy the RHDG operator, you will need to create three different objects:
 
 * Two *Openshift projects* that will contain the operator and the objects of the RHDG cluster.
 
-* An *OperatorGroup*, which configures all Operators deployed in the same namespace as the OperatorGroup object to watch for their custom resource (CR) in a list of namespaces or cluster-wide. Basically, you will need one in your namespace because you are not creating the operator one of the default Openshift projects, such as `openshift-operators`.
+* An *OperatorGroup*, which provides multitenant configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators. As we are not deploying our operator in the default namespace (`openshift-operators`), we will need to create one to set the namespaces where the Data Grid operator will be able to create and monitorize clusters.
+
+NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check <<,Annex: Configure the scope of your operator>> before executing the commands of this section.
 
 * A *Subscription*, which represents an intention to install an Operator. It is the custom resource that relates an Operator to a CatalogSource. Subscriptions describe which channel of an Operator package to subscribe to, and whether to perform updates automatically or manually. 
 
@@ -393,6 +395,11 @@ oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECUR
 
 
 For more information, access the Grafana https://grafana.com/docs/grafana/latest/[main documentation] or the Grafana https://github.com/integr8ly/grafana-operator/blob/v3.6.0/README.md[operator documentation].
+
+
+
+
+== Annex: Configure the scope of your operator
 
 
 
