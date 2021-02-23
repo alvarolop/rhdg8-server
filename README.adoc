@@ -168,7 +168,7 @@ To deploy the RHDG operator, you will need to create three different objects:
 
 * An *OperatorGroup*, which provides multitenant configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators. As we are not deploying our operator in the default namespace (`openshift-operators`), we will need to create one to set the namespaces where the Data Grid operator will be able to create and monitorize clusters.
 
-NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check <<annex-configure-the-scope-of-your-operator,Annex: Configure the scope of your operator>> before executing the commands of this section.
+NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check the <<annex-configure-the-scope-of-your-operator,annex>> before executing the commands of this section.
 
 * A *Subscription*, which represents an intention to install an Operator. It is the custom resource that relates an Operator to a CatalogSource. Subscriptions describe which channel of an Operator package to subscribe to, and whether to perform updates automatically or manually. 
 
