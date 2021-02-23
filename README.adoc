@@ -405,7 +405,51 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 == Annex: Configure the scope of your operator
 
+An Operator group, defined by the OperatorGroup resource, provides multitenant configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators.
 
+If you want to modify the default behavior of the template provided in this repository, modify lines 26 to 33 of this link:templates/rhdg-01-operator.yaml[template].
+
+1) *AllNamespaces*: The Operator can be a member of an Operator group that selects all namespaces (target namespace set is the empty string ""). This configuration allows us to create DG clusters in every namespace of the cluster:
+
+[source, yaml]
+----
+- apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: datagrid
+    namespace: ${OPERATOR_NAMESPACE}
+  spec: {}
+----
+
+2) *MultiNamespace*: The Operator can be a member of an Operator group that selects more than one namespace. Choose this option if you want to have several operators that manage RHDG clusters. For example, if you want to have a different operator per Business Unit managing several Openshift projects:
+[source, yaml]
+----
+- apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: datagrid
+    namespace: ${OPERATOR_NAMESPACE}
+  spec:
+    targetNamespaces:
+      - ${CLUSTER_NAMESPACE-1}
+      - ${CLUSTER_NAMESPACE-2}
+----
+
+3) *SingleNamespace*: The Operator can be a member of an Operator group that selects one namespace. This is useful if we want every application (Each OCP namespace) to be able to configure and deploy their own DG clusters:
+
+[source, yaml]
+----
+- apiVersion: operators.coreos.com/v1
+  kind: OperatorGroup
+  metadata:
+    name: datagrid
+    namespace: ${OPERATOR_NAMESPACE}
+  spec:
+    targetNamespaces:
+      - ${CLUSTER_NAMESPACE}
+----
+
+For more information, check Openshift https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html[documentation] about Operator Groups.
 
 
 
