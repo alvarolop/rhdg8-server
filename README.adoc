@@ -5,7 +5,7 @@ v1.0, 2020-11
 :toc: macro
 :sectanchors:
 :sectnumlevels: 2
-:sectnums: 
+// :sectnums: 
 :source-highlighter: pygments
 :imagesdir: images
 // Start: Enable admonition icons
