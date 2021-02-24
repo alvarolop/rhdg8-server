@@ -449,7 +449,7 @@ If you want to modify the default behavior of the template provided in this repo
       - ${CLUSTER_NAMESPACE}
 ----
 
-For more information, check Openshift https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html[documentation] about Operator Groups.
+For more information, check the Openshift https://docs.openshift.com/container-platform/4.6/operators/understanding/olm/olm-understanding-operatorgroups.html[documentation] about Operator Groups and the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#install_automated-install[documentation] to install DG on Openshift.
 
 
 
