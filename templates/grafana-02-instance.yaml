@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: grafana-deployment
@@ -74,6 +74,9 @@ objects:
         enabled: True
       auth.anonymous:
         enabled: True
+      security:
+        admin_password: admin
+        admin_user: admin
     containers:
       - args:
           - '-provider=openshift'
@@ -121,6 +124,8 @@ objects:
         service.alpha.openshift.io/serving-cert-secret-name: grafana-k8s-tls
     ingress:
       enabled: True
+      labels:
+        app: grafana
       targetPort: grafana-proxy
       termination: reencrypt
     client:
@@ -130,7 +135,10 @@ objects:
         serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"grafana-route"}}'
     dashboardLabelSelector:
       - matchExpressions:
-          - { key: "app", operator: In, values: ['grafana'] }
+          - key: "app"
+            operator: In
+            values: 
+              - grafana
 parameters:
 - name: OPERATOR_NAMESPACE
   description: "The project where the operator will be installed."
