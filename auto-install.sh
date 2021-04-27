@@ -5,7 +5,7 @@ set -e
 # Set your environment variables here
 RHDG_OPERATOR_NAMESPACE=rhdg8-operator
 RHDG_NAMESPACE=rhdg8
-RHDG_CLUSTER_NAME=rhdg8-cluster
+RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD="grafana-dashboard-rhdg8"
 

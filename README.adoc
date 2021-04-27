@@ -118,8 +118,8 @@ unzip redhat-datagrid-8.1.0-server.zip
 .Duplicate the server config
 [source, bash]
 ----
-cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-01
-cp redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
+cp -r redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-01
+cp -r redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
 ----
 
 
