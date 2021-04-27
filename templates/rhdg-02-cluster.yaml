@@ -23,9 +23,31 @@ objects:
       - username: developer
         password: developer
       - username: operator
-        password: operator
+        password: ${OPERATOR_PASSWORD}
       - username: prometheus
-        password: prometheus
+        password: ${PROMETHEUS_PASSWORD}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-caches-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData:
+    username: operator
+    password: ${OPERATOR_PASSWORD}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-monitoring-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData:
+    username: prometheus
+    password: ${PROMETHEUS_PASSWORD}
 - apiVersion: infinispan.org/v1
   kind: Infinispan
   metadata:
@@ -118,3 +140,13 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
+- name: PROMETHEUS_PASSWORD
+  description: "Password used by Prometheus to obtain metrics from /metrics."
+  required: true
+  from: '[a-zA-Z0-9]{20}'
+  generate: expression
+- name: OPERATOR_PASSWORD
+  description: "Password used by the Operator to create caches."
+  required: true
+  from: '[a-zA-Z0-9]{20}'
+  generate: expression
