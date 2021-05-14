@@ -105,10 +105,10 @@ objects:
       #   org.jgroups: debug
     replicas: 3
     security:
-      endpointEncryption:
+      # endpointEncryption:
         # certSecretName: ${CLUSTER_NAME}-cert-secret
         # certServiceName: ${CLUSTER_NAME}.${CLUSTER_NAMESPACE}.svc
-        type: Service
+        # type: Service
       endpointSecretName: ${CLUSTER_NAME}-credentials
     service:
       # container:
