@@ -115,7 +115,7 @@ objects:
       #   ephemeralStorage:
       #   storage: ''
       #   storageClassName:
-      replicationFactor: 2
+      # replicationFactor: 2
       # sites:
       #   local:
       #     expose:
