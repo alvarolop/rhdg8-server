@@ -532,7 +532,65 @@ oc process -f templates/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-
 ----
 
 
+== Annex: Deploy RHDG with XSite configuration
 
+
+WARNING: This configuration only works for two different OCP clusters and templates need extra configuration. Do not try to configure it on the same OCP cluster as this will only be available in DG 8.2 onwards.
+
+Create the namespaces and deploy the operator: 
+[source, bash]
+----
+oc process -f templates/rhdg-01-operator-xsite.yaml \
+  -p OPERATOR_NAMESPACE="rhdg8-xsite-operator" \
+  -p CLUSTER_NAMESPACE_XSITE_A="rhdg8-xsite-01" \
+  -p CLUSTER_NAMESPACE_XSITE_B="rhdg8-xsite-02" | oc apply -f -
+----
+
+
+Allow service accounts to access the API to check the DG clusters:
+[source, bash]
+----
+# Option 1: Documentation
+oc policy add-role-to-user view system:serviceaccount:rhdg8-xsite-01:rhdg-xsite-01
+oc policy add-role-to-user view system:serviceaccount:rhdg8-xsite-02:rhdg-xsite-02
+# Option 2: DG Teams group
+oc -n rhdg8-xsite-01 adm policy add-cluster-role-to-user cluster-reader -z rhdg-xsite-01
+oc -n rhdg8-xsite-02 adm policy add-cluster-role-to-user cluster-reader -z rhdg-xsite-02
+----
+
+
+Create cluster in OCP cluster 1:
+[source, bash]
+----
+oc process -f templates/rhdg-02-cluster-xsite.yaml \
+  -p CLUSTER_NAMESPACE="rhdg8-xsite-01" \
+  -p CLUSTER_NAME="rhdg-xsite-01" \
+  -p CLUSTER_NAMESPACE_XSITE_REMOTE="rhdg8-xsite-02" \
+  -p CLUSTER_NAME_XSITE_REMOTE="rhdg-xsite-02" | oc apply -f -
+----
+
+Create cluster in OCP cluster 2:
+[source, bash]
+----
+oc process -f templates/rhdg-02-cluster-xsite.yaml \
+  -p CLUSTER_NAMESPACE="rhdg8-xsite-02" \
+  -p CLUSTER_NAME="rhdg-xsite-02" \
+  -p CLUSTER_NAMESPACE_XSITE_REMOTE="rhdg8-xsite-01" \
+  -p CLUSTER_NAME_XSITE_REMOTE="rhdg-xsite-01" | oc apply -f -
+----
+
+Share tokens of the SA from one cluster to the other:
+[source, bash]
+----
+TOKEN_XSITE_01=$(oc sa get-token rhdg-xsite-01 -n rhdg8-xsite-01)
+TOKEN_XSITE_02=$(oc sa get-token rhdg-xsite-02 -n rhdg8-xsite-02)
+
+oc create secret generic rhdg-xsite-01-xsite-secret -n rhdg8-xsite-01 --from-literal=token=${TOKEN_XSITE_01}
+oc create secret generic rhdg-xsite-01-xsite-secret -n rhdg8-xsite-02 --from-literal=token=${TOKEN_XSITE_01}
+
+oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-01 --from-literal=token=${TOKEN_XSITE_02}
+oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-02 --from-literal=token=${TOKEN_XSITE_02}
+----
 
 
 
