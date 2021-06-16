@@ -3,8 +3,8 @@
 set -e
 
 # Set your environment variables here
-RHDG_OPERATOR_NAMESPACE=rhdg8-operator
-RHDG_NAMESPACE=rhdg8
+RHDG_OPERATOR_NAMESPACE=rhdg81-operator
+RHDG_NAMESPACE=rhdg81
 RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD="grafana-dashboard-rhdg8"
