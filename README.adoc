@@ -83,24 +83,24 @@ This is the basic installation option, valid for basic exploration and developme
 [source, bash]
 ----
 cd ~/Downloads
-unzip redhat-datagrid-8.1.0-server.zip
+unzip redhat-datagrid-8.2.0-server.zip
 ----
 
 .Create the developer user
 [source, bash]
 ----
-./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer
+./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer
 ----
 
 .Launch the server
 [source, bash]
 ----
-./redhat-datagrid-8.1.0-server/bin/server.sh 
-16:33:08,457 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.9+11
+./redhat-datagrid-8.2.0-server/bin/server.sh 
+2021-06-22 15:27:20,379 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.11+9
 [...]
-16:33:13,327 INFO  (main) [org.infinispan.SERVER] ISPN080004: Protocol SINGLE_PORT listening on 127.0.0.1:11222
-16:33:13,327 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat-42208' listening on http://127.0.0.1:11222
-16:33:13,327 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.1.0.GA started in 4806ms
+2021-06-22 15:27:30,674 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SINGLE_PORT (default) listening on 127.0.0.1:11222
+2021-06-22 15:27:30,674 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat-59097' listening on http://127.0.0.1:11222
+2021-06-22 15:27:30,773 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.2.0.GA started in 10278ms
 ----
 
 
@@ -112,43 +112,43 @@ Unzip the server as in the previous example, locate the folder named `server`, d
 [source, bash]
 ----
 cd ~/Downloads
-unzip redhat-datagrid-8.1.0-server.zip
+unzip redhat-datagrid-8.2.0-server.zip
 ----
 
 .Duplicate the server config
 [source, bash]
 ----
-cp -r redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-01
-cp -r redhat-datagrid-8.1.0-server/server redhat-datagrid-8.1.0-server/server-02
+cp -r redhat-datagrid-8.2.0-server/server redhat-datagrid-8.2.0-server/server-01
+cp -r redhat-datagrid-8.2.0-server/server redhat-datagrid-8.2.0-server/server-02
 ----
 
 
 .Create the developer user in both instances
 [source, bash]
 ----
-./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer --server-root=server-01
-./redhat-datagrid-8.1.0-server/bin/cli.sh user create developer -p developer --server-root=server-02
+./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer --server-root=server-01
+./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer --server-root=server-02
 ----
 
 
 .Launch both server instances
 [source, bash]
 ----
-./redhat-datagrid-8.1.0-server/bin/server.sh --node-name=node-01 --server-root=redhat-datagrid-8.1.0-server/server-01 --port-offset=0
-./redhat-datagrid-8.1.0-server/bin/server.sh --node-name=node-02 --server-root=redhat-datagrid-8.1.0-server/server-02 --port-offset=100
+./redhat-datagrid-8.2.0-server/bin/server.sh --node-name=node-01 --server-root=redhat-datagrid-8.2.0-server/server-01 --port-offset=0
+./redhat-datagrid-8.2.0-server/bin/server.sh --node-name=node-02 --server-root=redhat-datagrid-8.2.0-server/server-02 --port-offset=100
 ----
 
 After running both commands, you will see in both terminals similar logs to the ones shown below:
 [source, bash]
 ----
 [...]
-20:19:29,614 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
-20:19:29,614 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.1.0.GA started in 5585ms
-20:19:36,637 INFO  (jgroups-8,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
-20:19:36,647 INFO  (jgroups-8,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
-20:19:37,365 INFO  (jgroups-5,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
+2021-06-22 15:29:23,421 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
+2021-06-22 15:29:23,549 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.2.0.GA started in 19445ms
+2021-06-22 15:29:25,058 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
+2021-06-22 15:29:25,112 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
+2021-06-22 15:29:27,100 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
 [...]
-20:19:38,463 INFO  (jgroups-5,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
+2021-06-22 15:29:29,175 INFO  (jgroups-12,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
 ----
 
 
