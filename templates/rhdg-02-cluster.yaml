@@ -20,41 +20,44 @@ objects:
   stringData: 
     identities.yaml: |-     
       credentials:
-      - username: developer
-        password: developer
-      - username: operator
-        password: ${OPERATOR_PASSWORD}
-      - username: prometheus
-        password: ${PROMETHEUS_PASSWORD}
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${CLUSTER_NAME}-caches-credentials
-    namespace: ${CLUSTER_NAMESPACE}
-  labels:
-    type: middleware
-  type: Opaque 
-  stringData:
-    username: operator
-    password: ${OPERATOR_PASSWORD}
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${CLUSTER_NAME}-monitoring-credentials
-    namespace: ${CLUSTER_NAMESPACE}
-  labels:
-    type: middleware
-  type: Opaque 
-  stringData:
-    username: prometheus
-    password: ${PROMETHEUS_PASSWORD}
+      - username: myfirstusername
+        password: changeme-one
+      - username: mysecondusername
+        password: changeme-two
+# - apiVersion: v1
+#   kind: Secret
+#   metadata:
+#     name: ${CLUSTER_NAME}-caches-credentials
+#     namespace: ${CLUSTER_NAMESPACE}
+#   labels:
+#     type: middleware
+#   type: Opaque 
+#   stringData:
+#     username: operator
+#     password: ${OPERATOR_PASSWORD}
+# - apiVersion: v1
+#   kind: Secret
+#   metadata:
+#     name: ${CLUSTER_NAME}-monitoring-credentials
+#     namespace: ${CLUSTER_NAMESPACE}
+#   labels:
+#     type: middleware
+#   type: Opaque 
+#   stringData:
+#     username: prometheus
+#     password: ${PROMETHEUS_PASSWORD}
 - apiVersion: infinispan.org/v1
   kind: Infinispan
   metadata:
     name: ${CLUSTER_NAME}
     namespace: ${CLUSTER_NAMESPACE}
+    annotations:
+      infinispan.org/monitoring: 'false'
+      # infinispan.org/podTargetLabels: prometheus_domain
+      infinispan.org/targetLabels: prometheus_domain
     labels:
       type: middleware
+      prometheus_domain: ${CLUSTER_NAME}-domain
   spec:
     # affinity:
     #   nodeAffinity:
@@ -109,10 +112,11 @@ objects:
         # certSecretName:
         # certServiceName:
         type: None
-      endpointSecretName: ${CLUSTER_NAME}-credentials
+      endpointAuthentication: false
+      # endpointSecretName: ${CLUSTER_NAME}-credentials
     service:
-      # container:
-      #   ephemeralStorage:
+      container:
+        ephemeralStorage: true
       #   storage: ''
       #   storageClassName:
       # replicationFactor: 2
@@ -140,13 +144,3 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
-- name: PROMETHEUS_PASSWORD
-  description: "Password used by Prometheus to obtain metrics from /metrics."
-  required: true
-  from: '[a-zA-Z0-9]{20}'
-  generate: expression
-- name: OPERATOR_PASSWORD
-  description: "Password used by the Operator to create caches."
-  required: true
-  from: '[a-zA-Z0-9]{20}'
-  generate: expression
