@@ -9,49 +9,58 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
     openshift.io/support-url: https://access.redhat.com
 objects:
-- apiVersion: monitoring.coreos.com/v1
-  kind: ServiceMonitor
-  metadata:
-    labels:
-      k8s-app: prometheus
-      jirakey: one
-    name: datagrid-${CLUSTER_NAME}-monitoring
-    namespace: ${CLUSTER_NAMESPACE}
-  spec:
-# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor
-    endpoints:
-      - targetPort: 11222 
-        path: /metrics 
-        honorLabels: true
-        basicAuth:
-          username:
-            key: username
-            name: ${CLUSTER_NAME}-monitoring-credentials
+  # - apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #     name: infinispan-operator-config
+  #     namespace: ${OPERATOR_NAMESPACE}
+  #   data:
+  #     grafana.dashboard.namespace: ${CLUSTER_NAMESPACE}
+  #     grafana.dashboard.name: infinispan-dashboard
+  #     grafana.dashboard.monitoring.key: middleware
+
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: ${CLUSTER_NAME}-monitor
+      namespace: ${CLUSTER_NAMESPACE}
+    spec:
+      # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#endpoint
+      endpoints:
+      - basicAuth:
           password:
             key: password
-            name: ${CLUSTER_NAME}-monitoring-credentials
+            name: ${CLUSTER_NAME}-generated-operator-secret
+          username:
+            key: username
+            name: ${CLUSTER_NAME}-generated-operator-secret
+        bearerTokenSecret:
+          key: ""
+        honorLabels: true
         interval: 30s
+        path: /metrics
+        port: infinispan-adm
+        # Option 2 to inherit all labels from service 
+        # relabelings:
+        #   - action: labelmap
+        #     regex: __meta_kubernetes_service_label_(.+)
+        # Option 3 to inherit all labels starting on prometheus_ from service. The final metric does not contain prometheus_
+        relabelings:
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_prometheus_(.+)
+        scheme: http
         scrapeTimeout: 10s
-        scheme: http 
-        # tlsConfig:
-        #   insecureSkipVerify: true
-        #   serverName: ${CLUSTER_NAME} 
-# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
-        # metricRelabelings:
-        #   - sourceLabels: [clusterName]
-        #     targetLabel: bu_code
-        #     regex: (.*)
-        #     replacement: ${1}
-        #     action: replace
-    namespaceSelector:
-      matchNames:
-        - ${CLUSTER_NAMESPACE} 
-    selector:
-      matchLabels:
-        app: infinispan-service
-        clusterName: ${CLUSTER_NAME}
-    targetLabels:
-      - clusterName
+      namespaceSelector:
+        matchNames:
+        - ${CLUSTER_NAMESPACE}
+      # Option 1 to inherit specific labels from service
+      # targetLabels:
+      #   - prometheus_domain
+      selector:
+        matchLabels:
+          app: infinispan-service
+          clusterName: ${CLUSTER_NAME}
+          infinispan_cr: ${CLUSTER_NAME}
 parameters:
 - name: CLUSTER_NAMESPACE
   description: "The project where the RHDG cluster will be installed."
@@ -61,3 +70,11 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
+# - name: GRAFANA_NAMESPACE
+#   description: "The project where the Grafana will be installed."
+#   required: true
+#   value: "grafana"
+# - name: OPERATOR_NAMESPACE
+#   description: "The project where the Grafana will be installed."
+#   required: true
+#   value: "rhdg8-operator"
