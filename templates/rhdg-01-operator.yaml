@@ -31,13 +31,14 @@ objects:
   spec:
     targetNamespaces:
       - ${CLUSTER_NAMESPACE}
+      # - ${GRAFANA_NAMESPACE}
 - apiVersion: operators.coreos.com/v1alpha1
   kind: Subscription
   metadata:
     name: datagrid-operator
     namespace: ${OPERATOR_NAMESPACE}
   spec:
-    channel: 8.1.x
+    channel: 8.2.x
     installPlanApproval: Automatic 
     name: datagrid
     source: redhat-operators
@@ -51,3 +52,7 @@ parameters:
   description: "The project where the RHDG cluster will be installed."
   required: false
   value: "rhdg8"
+# - name: GRAFANA_NAMESPACE
+#   description: "The project where the Grafana will be installed."
+#   required: true
+#   value: "grafana"
