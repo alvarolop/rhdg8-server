@@ -18,7 +18,6 @@ objects:
   #     grafana.dashboard.namespace: ${CLUSTER_NAMESPACE}
   #     grafana.dashboard.name: infinispan-dashboard
   #     grafana.dashboard.monitoring.key: middleware
-
   - apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
