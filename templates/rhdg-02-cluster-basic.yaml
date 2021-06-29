@@ -9,52 +9,18 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
     openshift.io/support-url: https://access.redhat.com
 objects:
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${CLUSTER_NAME}-credentials
-    namespace: ${CLUSTER_NAMESPACE}
-  labels:
-    type: middleware
-  type: Opaque 
-  stringData: 
-    identities.yaml: |-     
-      credentials:
-      - username: developer
-        password: developer
-      - username: operator
-        password: ${OPERATOR_PASSWORD}
-      - username: prometheus
-        password: ${PROMETHEUS_PASSWORD}
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${CLUSTER_NAME}-caches-credentials
-    namespace: ${CLUSTER_NAMESPACE}
-  labels:
-    type: middleware
-  type: Opaque 
-  stringData:
-    username: operator
-    password: ${OPERATOR_PASSWORD}
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${CLUSTER_NAME}-monitoring-credentials
-    namespace: ${CLUSTER_NAMESPACE}
-  labels:
-    type: middleware
-  type: Opaque 
-  stringData:
-    username: prometheus
-    password: ${PROMETHEUS_PASSWORD}
 - apiVersion: infinispan.org/v1
   kind: Infinispan
   metadata:
     name: ${CLUSTER_NAME}
     namespace: ${CLUSTER_NAMESPACE}
+    annotations:
+      infinispan.org/monitoring: 'false'
+      infinispan.org/podTargetLabels: prometheus_domain
+      # infinispan.org/targetLabels: prometheus_domain
     labels:
       type: middleware
+      prometheus_domain: ${CLUSTER_NAME}
   spec:
     # affinity:
     #   nodeAffinity:
@@ -105,14 +71,15 @@ objects:
       #   org.jgroups: debug
     replicas: 3
     security:
-      # endpointEncryption:
-        # certSecretName: ${CLUSTER_NAME}-cert-secret
-        # certServiceName: ${CLUSTER_NAME}.${CLUSTER_NAMESPACE}.svc
-        # type: Service
-      endpointSecretName: ${CLUSTER_NAME}-credentials
+      endpointEncryption:
+        # certSecretName:
+        # certServiceName:
+        type: None
+      endpointAuthentication: false
+      # endpointSecretName: ${CLUSTER_NAME}-credentials
     service:
-      # container:
-      #   ephemeralStorage:
+      container:
+        ephemeralStorage: true
       #   storage: ''
       #   storageClassName:
       # replicationFactor: 2
@@ -140,13 +107,3 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
-- name: PROMETHEUS_PASSWORD
-  description: "Password used by Prometheus to obtain metrics from /metrics."
-  required: true
-  from: '[a-zA-Z0-9]{20}'
-  generate: expression
-- name: OPERATOR_PASSWORD
-  description: "Password used by the Operator to create caches."
-  required: true
-  from: '[a-zA-Z0-9]{20}'
-  generate: expression

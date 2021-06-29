@@ -46,7 +46,8 @@ objects:
         # Option 3 to inherit all labels starting on prometheus_ from service. The final metric does not contain prometheus_
         relabelings:
           - action: labelmap
-            regex: __meta_kubernetes_service_label_prometheus_(.+)
+            # regex: __meta_kubernetes_service_label_prometheus_(.+)
+            regex: __meta_kubernetes_pod_label_prometheus_(.+)
         scheme: http
         scrapeTimeout: 10s
       namespaceSelector:

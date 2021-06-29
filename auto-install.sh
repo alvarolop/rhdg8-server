@@ -28,7 +28,7 @@ echo -e " * RHDG_SSL_ENABLED: $RHDG_SSL_ENABLED"
 echo -e "==============\n"
 
 if ! $RHDG_AUTH_ENABLED; then
-    OCP_CLUSTER_TEMPLATE="rhdg-02-cluster"
+    OCP_CLUSTER_TEMPLATE="rhdg-02-cluster-basic"
     SERVICE_MONITOR_HTTP_SCHEME="http"
 else 
     if ! $RHDG_SSL_ENABLED; then
