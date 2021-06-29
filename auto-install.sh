@@ -55,7 +55,7 @@ oc process -f templates/rhdg-01-operator.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for pods ready..."
-while [[ $(oc get pods -l name=infinispan-operator-alm-owned -n $RHDG_OPERATOR_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
+while [[ $(oc get pods -l name=infinispan-operator -n $RHDG_OPERATOR_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
 
 # Deploy the RHDG cluster
 echo -e "\n[2/8]Deploying the RHDG cluster"
@@ -68,6 +68,8 @@ echo -e "\n[3/8]Creating basic caches"
 oc process -f templates/rhdg-03-caches.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
+
+oc project rhdg8
 
 ##
 # 2) PROMETHEUS
