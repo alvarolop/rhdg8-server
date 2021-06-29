@@ -8,6 +8,8 @@ RHDG_NAMESPACE=rhdg8
 RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD="grafana-dashboard-rhdg8"
+RHDG_AUTH_ENABLED=false
+RHDG_SSL_ENABLED=false
 
 #############################
 ## Do not modify anything from this line
@@ -21,7 +23,22 @@ echo -e " * RHDG_NAMESPACE: $RHDG_NAMESPACE"
 echo -e " * RHDG_CLUSTER_NAME: $RHDG_CLUSTER_NAME"
 echo -e " * GRAFANA_NAMESPACE: $GRAFANA_NAMESPACE"
 echo -e " * GRAFANA_DASHBOARD: $GRAFANA_DASHBOARD"
+echo -e " * RHDG_AUTH_ENABLED: $RHDG_AUTH_ENABLED"
+echo -e " * RHDG_SSL_ENABLED: $RHDG_SSL_ENABLED"
 echo -e "==============\n"
+
+if ! $RHDG_AUTH_ENABLED; then
+    OCP_CLUSTER_TEMPLATE="rhdg-02-cluster"
+    SERVICE_MONITOR_HTTP_SCHEME="http"
+else 
+    if ! $RHDG_SSL_ENABLED; then
+        OCP_CLUSTER_TEMPLATE="rhdg-02-cluster-auth"
+        SERVICE_MONITOR_HTTP_SCHEME="http"
+    else
+        OCP_CLUSTER_TEMPLATE="rhdg-02-cluster-auth-ssl"
+        SERVICE_MONITOR_HTTP_SCHEME="https"
+    fi
+fi
 
 # Check if the user is logged in 
 if ! oc whoami &> /dev/null; then
@@ -59,7 +76,7 @@ while [[ $(oc get pods -l name=infinispan-operator -n $RHDG_OPERATOR_NAMESPACE -
 
 # Deploy the RHDG cluster
 echo -e "\n[2/8]Deploying the RHDG cluster"
-oc process -f templates/rhdg-02-cluster.yaml \
+oc process -f templates/${OCP_CLUSTER_TEMPLATE}.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
@@ -79,7 +96,8 @@ oc project rhdg8
 echo -e "\n[4/8]Configure Prometheus to monitor RHDG"
 oc process -f templates/rhdg-04-monitoring.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
-    -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
+    -p CLUSTER_NAME=$RHDG_CLUSTER_NAME \
+    -p SERVICE_MONITOR_HTTP_SCHEME=$SERVICE_MONITOR_HTTP_SCHEME | oc apply -f -
 
 
 ##
@@ -113,6 +131,10 @@ oc process -f templates/grafana-03-datasource.yaml \
 
 # Create a Grafana dashboard
 echo -e "\n[8/8]Creating the Grafana dashboard"
+if oc get cm $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE &> /dev/null; then
+    echo -e "Check. There was a previous configuration. Deleting..."
+    oc delete configmap $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE
+fi
 oc create configmap $GRAFANA_DASHBOARD --from-file=dashboard=grafana/$GRAFANA_DASHBOARD.json -n $GRAFANA_NAMESPACE
 oc process -f templates/grafana-04-dashboard.yaml \
     -p DASHBOARD_NAME=$GRAFANA_DASHBOARD \

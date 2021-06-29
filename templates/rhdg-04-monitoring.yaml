@@ -69,6 +69,10 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
+- name: SERVICE_MONITOR_HTTP_SCHEME
+  description: "The scheme to connect to metrics."
+  required: false
+  value: "http"
 # - name: GRAFANA_NAMESPACE
 #   description: "The project where the Grafana will be installed."
 #   required: true
