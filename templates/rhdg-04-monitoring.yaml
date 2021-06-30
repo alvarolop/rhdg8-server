@@ -21,7 +21,8 @@ objects:
   - apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
-      name: ${CLUSTER_NAME}-monitor
+      # Avoid using ${CLUSTER_NAME}-monitor. The operator will automatically remove it.
+      name: ${CLUSTER_NAME}-service-monitor
       namespace: ${CLUSTER_NAMESPACE}
     spec:
       # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#endpoint
@@ -46,8 +47,8 @@ objects:
         # Option 3 to inherit all labels starting on prometheus_ from service. The final metric does not contain prometheus_
         relabelings:
           - action: labelmap
-            # regex: __meta_kubernetes_service_label_prometheus_(.+)
-            regex: __meta_kubernetes_pod_label_prometheus_(.+)
+            regex: __meta_kubernetes_service_label_prometheus_(.+)
+            # regex: __meta_kubernetes_pod_label_prometheus_(.+)
         scheme: http
         scrapeTimeout: 10s
       namespaceSelector:

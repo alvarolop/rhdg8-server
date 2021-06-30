@@ -33,8 +33,8 @@ objects:
     namespace: ${CLUSTER_NAMESPACE}
     annotations:
       infinispan.org/monitoring: 'false'
-      infinispan.org/podTargetLabels: prometheus_domain
-      # infinispan.org/targetLabels: prometheus_domain
+      # infinispan.org/podTargetLabels: prometheus_domain
+      infinispan.org/targetLabels: prometheus_domain
     labels:
       type: middleware
       prometheus_domain: ${CLUSTER_NAME}
