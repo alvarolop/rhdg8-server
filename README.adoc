@@ -387,6 +387,7 @@ oc create configmap $DASHBOARD_NAME --from-file=dashboard=grafana/$DASHBOARD_NAM
 oc process -f templates/grafana-04-dashboard.yaml -p DASHBOARD_NAME=$DASHBOARD_NAME | oc apply -f -
 ----
 
+NOTE: https://github.com/grafana-operator/grafana-operator/blob/master/deploy/examples/dashboards[Here] you can find information of other ways of creating dashboards.
 
 
 === Access Grafana as admin
