@@ -7,7 +7,8 @@ RHDG_OPERATOR_NAMESPACE=rhdg8-operator
 RHDG_NAMESPACE=rhdg8
 RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
-GRAFANA_DASHBOARD="grafana-dashboard-rhdg8"
+GRAFANA_DASHBOARD_NAME="grafana-dashboard-rhdg8"
+GRAFANA_DASHBOARD_KEY="dashboard.json"
 RHDG_AUTH_ENABLED=false
 RHDG_SSL_ENABLED=false
 
@@ -110,7 +111,7 @@ oc process -f templates/grafana-01-operator.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for pods ready..."
-while [[ $(oc get pods -l name=grafana-operator -n $GRAFANA_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
+while [[ $(oc get pods -l control-plane=controller-manager -n $GRAFANA_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
 
 # Create a Grafana instance
 echo -e "\n[6/8]Creating a grafana instance"
@@ -135,10 +136,11 @@ if oc get cm $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE &> /dev/null; then
     echo -e "Check. There was a previous configuration. Deleting..."
     oc delete configmap $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE
 fi
-oc create configmap $GRAFANA_DASHBOARD --from-file=dashboard=grafana/$GRAFANA_DASHBOARD.json -n $GRAFANA_NAMESPACE
+oc create configmap $GRAFANA_DASHBOARD --from-file=$DASHBOARD_KEY=grafana/$GRAFANA_DASHBOARD.json -n $GRAFANA_NAMESPACE
 oc process -f templates/grafana-04-dashboard.yaml \
     -p DASHBOARD_NAME=$GRAFANA_DASHBOARD \
-    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
+    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
+    -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
 
 # Print Grafana credentials
 GRAFANA_ADMIN=$(oc get secret grafana-admin-credentials -n $GRAFANA_NAMESPACE -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode)

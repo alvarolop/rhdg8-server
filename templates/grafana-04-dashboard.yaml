@@ -20,7 +20,13 @@ objects:
     name: ${DASHBOARD_NAME}.json
     configMapRef:
       name: ${DASHBOARD_NAME}
-      key: dashboard
+      key: ${DASHBOARD_KEY}
+    customFolderName: "RHDG 8 - Monitoring"
+    datasources:
+      - inputName: "DS_PROMETHEUS"
+        datasourceName: "Prometheus"
+    json:
+      ""
 parameters:
 - name: OPERATOR_NAMESPACE
   description: "The project where the operator will be installed."
@@ -30,3 +36,7 @@ parameters:
   description: "The name of the dashboard."
   required: false
   value: "grafana-dashboard-rhdg8"
+- name: DASHBOARD_KEY
+  description: "The name of the json file inside the ConfigMap."
+  required: false
+  value: "dashboard.json"
