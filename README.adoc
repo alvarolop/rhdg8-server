@@ -178,7 +178,7 @@ IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-01-operator.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-01-operator.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the operator and the cluster is installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
@@ -190,7 +190,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
+oc process -f rhdg-operator/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
 ----
 
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
@@ -208,7 +208,7 @@ I have created an OCP template to quickly deploy a basic RHDG cluster with 3 rep
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-02-cluster.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
@@ -221,7 +221,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 
@@ -251,7 +251,7 @@ I have created an OCP template to quickly set up two caches on the RHDG cluster:
 In order to apply this template, just execute the following command:
 [source, bash]
 ----
-oc process -f rhdg/rhdg-03-caches.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-03-caches.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
@@ -264,7 +264,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f rhdg-operator/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 Interact with the newly created caches with he following commands:
@@ -324,7 +324,7 @@ I have created an OCP template to quickly configure metrics monitorization of a 
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-04-monitoring.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-04-monitoring.yaml | oc apply -f -
 ----
 
 This template provides two parameters to modify the project where the cluster was installed and the name of the cluster itself. By default, values are: 
@@ -337,7 +337,7 @@ Modify them just passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f rhdg-operator/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 For more information, access the Openshift https://docs.openshift.com/container-platform/4.6/monitoring/understanding-the-monitoring-stack.html[documentation] for the monitoring stack and the RHDG documenation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#prometheus[configure monitoring] for RHDG 8 on OCP.
@@ -411,7 +411,7 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-05-alerting-rules.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-05-alerting-rules.yaml | oc apply -f -
 ----
 
 
@@ -494,7 +494,7 @@ The same configuration rules from the previous chapter apply.
 
 [source, bash, linenums]
 ----
-oc process -f rhdg/infinispan-01-operator.yaml -p OPERATOR_NAMESPACE="infinispan-operator" -p CLUSTER_NAMESPACE="infinispan" | oc apply -f -
+oc process -f rhdg-operator/infinispan-01-operator.yaml -p OPERATOR_NAMESPACE="infinispan-operator" -p CLUSTER_NAMESPACE="infinispan" | oc apply -f -
 ----
 
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
@@ -514,11 +514,11 @@ By default, the template deploys a RHDG cluster named `rhdg` in the project `rhd
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-99-operatorless.yaml | oc apply -f -
+oc process -f rhdg-template/rhdg-99-operatorless.yaml | oc apply -f -
 ----
 
 
-Due to the limitation of OCP templates, if you want to change the cluster name and the namespace, you will have to edit lines #103, and #107 of the file `rhdg/rhdg-99-operatorless.yaml`. This is the pattern that you have to follow [Substitute the ENV_VARS with the correct values]:
+Due to the limitation of OCP templates, if you want to change the cluster name and the namespace, you will have to edit lines #103, and #107 of the file `rhdg-template/rhdg-99-operatorless.yaml`. This is the pattern that you have to follow [Substitute the ENV_VARS with the correct values]:
 
 [source, yaml]
 ----
@@ -536,7 +536,7 @@ After modifying the yaml, process the template with the correct params:
 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f rhdg-template/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
 
@@ -548,7 +548,7 @@ WARNING: This configuration only works for two different OCP clusters and templa
 Create the namespaces and deploy the operator: 
 [source, bash]
 ----
-oc process -f rhdg/rhdg-01-operator-xsite.yaml \
+oc process -f rhdg-operator/rhdg-01-operator-xsite.yaml \
   -p OPERATOR_NAMESPACE="rhdg8-xsite-operator" \
   -p CLUSTER_NAMESPACE_XSITE_A="rhdg8-xsite-01" \
   -p CLUSTER_NAMESPACE_XSITE_B="rhdg8-xsite-02" | oc apply -f -
@@ -570,7 +570,7 @@ oc -n rhdg8-xsite-02 adm policy add-cluster-role-to-user cluster-reader -z rhdg-
 Create cluster in OCP cluster 1:
 [source, bash]
 ----
-oc process -f rhdg/rhdg-02-cluster-xsite.yaml \
+oc process -f rhdg-operator/rhdg-02-cluster-xsite.yaml \
   -p CLUSTER_NAMESPACE="rhdg8-xsite-01" \
   -p CLUSTER_NAME="rhdg-xsite-01" \
   -p CLUSTER_NAMESPACE_XSITE_REMOTE="rhdg8-xsite-02" \
@@ -580,7 +580,7 @@ oc process -f rhdg/rhdg-02-cluster-xsite.yaml \
 Create cluster in OCP cluster 2:
 [source, bash]
 ----
-oc process -f rhdg/rhdg-02-cluster-xsite.yaml \
+oc process -f rhdg-operator/rhdg-02-cluster-xsite.yaml \
   -p CLUSTER_NAMESPACE="rhdg8-xsite-02" \
   -p CLUSTER_NAME="rhdg-xsite-02" \
   -p CLUSTER_NAMESPACE_XSITE_REMOTE="rhdg8-xsite-01" \

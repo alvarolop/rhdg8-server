@@ -1,0 +1,319 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: rhdg8-monitoring
+  annotations:
+    description: Template to deploy a RHDG 8 cluster on OCP without the need of an operator. Bear in mind that this template is for testing purposes and that the installation made with it will not benefit from any kind of Red Hat support.
+    tags: infinispan,datagrid
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+- apiVersion: project.openshift.io/v1
+  kind: Project
+  metadata:
+    name: ${CLUSTER_NAMESPACE}
+    annotations:
+      openshift.io/description: "This project contains a cluster of Red Hat Data Grid 8"
+      openshift.io/display-name: "RH Data Grid 8 - Operatorless"
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+  type: Opaque 
+  stringData: 
+    identities.yaml: |-     
+      credentials:
+      - username: developer
+        password: developer
+      - username: operator
+        password: operator
+      - username: prometheus
+        password: prometheus
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Provides a service for accessing the application over Hot Rod protocol.
+    labels:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+      metrics: "yes"
+    name: ${CLUSTER_NAME}
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+    ports:
+    - name: hotrod
+      port: 11222
+      protocol: TCP
+      targetPort: 11222
+    selector:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Provides a ping service for clustered applications.
+    labels:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+    name: ${CLUSTER_NAME}-ping
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+    clusterIP: None
+    ports:
+    - name: ping
+      port: 8888
+      protocol: TCP
+      targetPort: 8888
+    selector:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+    name: ${CLUSTER_NAME}-external
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+    to:
+      kind: Service
+      name: rhdg
+      weight: 100
+    wildcardPolicy: None
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    labels:
+      app: ${CLUSTER_NAME}
+      clusterName: ${CLUSTER_NAME}
+    name: ${CLUSTER_NAME}-configuration    
+    namespace: ${CLUSTER_NAMESPACE}
+  data:
+    infinispan.yaml: |
+      clusterName: rhdg
+      jgroups:
+        transport: tcp
+        dnsPing:
+          query: rhdg-ping.rhdg8-operatorless.svc.cluster.local
+        diagnostics: false
+      keystore:
+        path: ""
+        password: ""
+        alias: ""
+      xsite:
+        address: ""
+        name: ""
+        port: 0
+        backups: []
+      logging:
+        categories: {}
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    labels:
+      template: infinispan-ephemeral
+    name: ${CLUSTER_NAME}
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+    podManagementPolicy: OrderedReady
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: ${CLUSTER_NAME}
+        clusterName: ${CLUSTER_NAME}
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          app: ${CLUSTER_NAME}
+          clusterName: ${CLUSTER_NAME}
+      spec:
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: ${CLUSTER_NAME}
+                    clusterName: ${CLUSTER_NAME}
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+        containers:
+        - env:
+          - name: CONFIG_PATH
+            value: /etc/config/infinispan.yaml
+          - name: IDENTITIES_PATH
+            value: /etc/security/identities.yaml
+          - name: JAVA_OPTIONS
+            value: -Xlog:gc*=info:file=/tmp/gc.log:time,level,tags,uptimemillis:filecount=10,filesize=1m -XX:-UseParallelOldGC -XX:+UseG1GC -XX:MaxGCPauseMillis=400
+          - name: EXTRA_JAVA_OPTIONS
+            value: -Xlog:gc*=info:file=/tmp/gc.log:time,level,tags,uptimemillis:filecount=10,filesize=1m -XX:-UseParallelOldGC -XX:+UseG1GC -XX:MaxGCPauseMillis=400
+          - name: DEFAULT_IMAGE
+            value: registry.redhat.io/datagrid/datagrid-8-rhel:1.1
+          image: registry.redhat.io/datagrid/datagrid-8-rhel8:1.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: rest/v2/cache-managers/default/health/status
+              port: 11222
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 80
+          name: infinispan
+          ports:
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          - containerPort: 11222
+            name: hotrod
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: rest/v2/cache-managers/default/health/status
+              port: 11222
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 80
+          resources:
+            limits:
+              cpu: "2"
+              memory: 3Gi
+            requests:
+              cpu: "1"
+              memory: 3Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /etc/config
+            name: config-volume
+          - mountPath: /etc/security
+            name: identities-volume
+          - mountPath: /opt/infinispan/server/data
+            name: rhdg
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: rhdg-configuration
+          name: config-volume
+        - name: identities-volume
+          secret:
+            defaultMode: 420
+            secretName: rhdg-credentials
+    updateStrategy:
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        creationTimestamp: null
+        name: rhdg
+        namespace: rhdg8
+        ownerReferences:
+        - apiVersion: infinispan.org/v1
+          blockOwnerDeletion: false
+          controller: true
+          kind: Infinispan
+          name: rhdg
+          uid: 07e941f7-ec58-4442-8382-5df3f79ceca8
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 3Gi
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+##
+# The following configuration is to set monitoring with Prometheus
+# Secret + ServiceMonitor
+## 
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-monitoring-credentials
+    namespace: ${CLUSTER_NAMESPACE}
+  labels:
+    type: middleware
+    app: ${CLUSTER_NAME}
+    clusterName: ${CLUSTER_NAME}
+  type: Opaque 
+  stringData:
+    username: prometheus
+    password: prometheus
+- apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+    labels:
+      k8s-app: prometheus
+      jirakey: one
+    name: datagrid-${CLUSTER_NAME}-monitoring
+    namespace: ${CLUSTER_NAMESPACE}
+  spec:
+# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor
+    endpoints:
+      - targetPort: 11222 
+        path: /metrics 
+        honorLabels: true
+        basicAuth:
+          username:
+            key: username
+            name: ${CLUSTER_NAME}-monitoring-credentials
+          password:
+            key: password
+            name: ${CLUSTER_NAME}-monitoring-credentials
+        interval: 30s
+        scrapeTimeout: 10s
+        scheme: http 
+        # tlsConfig:
+        #   insecureSkipVerify: true
+        #   serverName: ${CLUSTER_NAME} 
+# Docu: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+        # metricRelabelings:
+        #   - sourceLabels: [clusterName]
+        #     targetLabel: bu_code
+        #     regex: (.*)
+        #     replacement: ${1}
+        #     action: replace
+    namespaceSelector:
+      matchNames:
+        - ${CLUSTER_NAMESPACE} 
+    selector:
+      matchLabels:
+        app: ${CLUSTER_NAME}
+        clusterName: ${CLUSTER_NAME}
+        metrics: "yes"
+    targetLabels:
+      - clusterName
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8-operatorless"
+- name: CLUSTER_NAME
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "rhdg"
