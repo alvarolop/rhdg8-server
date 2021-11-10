@@ -152,6 +152,15 @@ After running both commands, you will see in both terminals similar logs to the 
 ----
 
 
+
+
+
+
+
+
+
+
+
 == Deploying RHDG on OCP using the Operator
 
 An Operator is a method of packaging, deploying and managing a Kubernetes-native application. A Kubernetes-native application is an application that is both deployed on Kubernetes and managed using the Kubernetes APIs and kubectl tooling.
@@ -344,6 +353,63 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 
 
+
+
+== Deploying RHDG on OCP using Helm Charts
+
+
+
+
+
+
+
+
+
+
+== Deploying RHDG on OCP using a template [Outdated at 8.1]
+
+WARNING: Bear in mind that this template is for testing purposes and that the installation made with it will not benefit from any kind of Red Hat support.
+
+If you need to test any configuration that the operator does not provide, it is possible to deploy the RHDG cluster manually creating all the Openshift resources that the Operator manages automagically.
+
+By default, the template deploys a RHDG cluster named `rhdg` in the project `rhdg8-operatorless`. Deploy your cluster performing the following command:
+
+[source, bash]
+----
+oc process -f rhdg-template/rhdg-99-operatorless.yaml | oc apply -f -
+----
+
+
+Due to the limitation of OCP templates, if you want to change the cluster name and the namespace, you will have to edit lines #103, and #107 of the file `rhdg-template/rhdg-99-operatorless.yaml`. This is the pattern that you have to follow [Substitute the ENV_VARS with the correct values]:
+
+[source, yaml]
+----
+  data:
+    infinispan.yaml: |
+      clusterName: ${CLUSTER_NAME}
+      jgroups:
+        transport: tcp
+        dnsPing:
+          query: ${CLUSTER_NAME}-ping.${CLUSTER_NAMESPACE}.svc.cluster.local
+        diagnostics: false
+----
+
+After modifying the yaml, process the template with the correct params:
+
+[source, bash]
+----
+oc process -f rhdg-template/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+----
+
+
+
+
+
+
+
+
+
+
 == Monitoring RHDG with Grafana
 
 A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
@@ -504,43 +570,8 @@ It is also possible to install the operator from the web console. For more infor
 
 
 
-== Annex: Deploying RHDG 8 without operator
 
-WARNING: Bear in mind that this template is for testing purposes and that the installation made with it will not benefit from any kind of Red Hat support.
-
-If you need to test any configuration that the operator does not provide, it is possible to deploy the RHDG cluster manually creating all the Openshift resources that the Operator manages automagically.
-
-By default, the template deploys a RHDG cluster named `rhdg` in the project `rhdg8-operatorless`. Deploy your cluster performing the following command:
-
-[source, bash]
-----
-oc process -f rhdg-template/rhdg-99-operatorless.yaml | oc apply -f -
-----
-
-
-Due to the limitation of OCP templates, if you want to change the cluster name and the namespace, you will have to edit lines #103, and #107 of the file `rhdg-template/rhdg-99-operatorless.yaml`. This is the pattern that you have to follow [Substitute the ENV_VARS with the correct values]:
-
-[source, yaml]
-----
-  data:
-    infinispan.yaml: |
-      clusterName: ${CLUSTER_NAME}
-      jgroups:
-        transport: tcp
-        dnsPing:
-          query: ${CLUSTER_NAME}-ping.${CLUSTER_NAMESPACE}.svc.cluster.local
-        diagnostics: false
-----
-
-After modifying the yaml, process the template with the correct params:
-
-[source, bash]
-----
-oc process -f rhdg-template/rhdg-99-operatorless.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
-----
-
-
-== Annex: Deploy RHDG with XSite configuration
+== Annex: Deploy RHDG with XSite configuration [Outdated 8.1]
 
 
 WARNING: This configuration only works for two different OCP clusters and templates need extra configuration. Do not try to configure it on the same OCP cluster as this will only be available in DG 8.2 onwards.
@@ -602,7 +633,23 @@ oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-02 --from-lit
 
 
 
-== Annex: Retrieve server reports from Openshift
+== Annex: Advanced stats, and reporting for RHDG
+
+
+=== Retrieve Queries stats
+
+[source, bash]
+----
+oc project $RHDG_NAMESPACE
+for pod in $(oc get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
+do
+  echo "$pod: Get stats"
+  oc exec $pod -- bash -c 'curl $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN/rest/v2/$CACHE_NAME/operator-cache-01/search/stats' | jq
+done
+----
+
+
+=== Retrieve server reports from Openshift
 
 
 [source, bash]
@@ -620,17 +667,7 @@ done
 ----
 
 
-== Annex: Retrieve Queries stats
 
-[source, bash]
-----
-oc project $RHDG_NAMESPACE
-for pod in $(oc get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
-do
-  echo "$pod: Get stats"
-  oc exec $pod -- bash -c 'curl $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN/rest/v2/$CACHE_NAME/operator-cache-01/search/stats' | jq
-done
-----
 
 
 
