@@ -17,8 +17,6 @@ objects:
     labels:
       type: middleware
   spec:
-    adminAuth:
-      secretName: ${CLUSTER_NAME}-caches-credentials
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-01
     template: >-
@@ -41,8 +39,6 @@ objects:
     labels:
       type: middleware
   spec:
-    adminAuth:
-      secretName: ${CLUSTER_NAME}-caches-credentials
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-02
     templateName: org.infinispan.DIST_SYNC
