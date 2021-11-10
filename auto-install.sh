@@ -132,13 +132,13 @@ oc process -f templates/grafana-03-datasource.yaml \
 
 # Create a Grafana dashboard
 echo -e "\n[8/8]Creating the Grafana dashboard"
-if oc get cm $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE &> /dev/null; then
+if oc get cm $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE &> /dev/null; then
     echo -e "Check. There was a previous configuration. Deleting..."
-    oc delete configmap $GRAFANA_DASHBOARD -n $GRAFANA_NAMESPACE
+    oc delete configmap $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE
 fi
-oc create configmap $GRAFANA_DASHBOARD --from-file=$DASHBOARD_KEY=grafana/$GRAFANA_DASHBOARD.json -n $GRAFANA_NAMESPACE
+oc create configmap $GRAFANA_DASHBOARD_NAME --from-file=$GRAFANA_DASHBOARD_KEY=grafana/$GRAFANA_DASHBOARD_NAME.json -n $GRAFANA_NAMESPACE
 oc process -f templates/grafana-04-dashboard.yaml \
-    -p DASHBOARD_NAME=$GRAFANA_DASHBOARD \
+    -p DASHBOARD_NAME=$GRAFANA_DASHBOARD_NAME \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
     -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
 
