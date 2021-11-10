@@ -1,0 +1,7 @@
+#Build configuration
+images:
+  server: quay.io/infinispan/server:13.0
+  initContainer: registry.access.redhat.com/ubi8-micro
+#Deployment configuration
+deploy:
+  replicas: 2

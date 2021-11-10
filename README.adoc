@@ -357,11 +357,61 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 == Deploying RHDG on OCP using Helm Charts
 
+Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let’s have a look at an example.
+
+=== Option 1: Using an official Infinispan Helm Chart release
+
+In order to create your first deployment easily, first https://github.com/openshift-helm-charts/charts/blob/main/README.md[add the OpenShift Helm Charts repository]:
+
+
+[source, bash]
+----
+helm repo add openshift-helm-charts https://charts.openshift.io/
+----
+
+Create a new OCP project:
+[source, bash]
+----
+oc new-project rhdg8-helm --display-name="RHDG 8 - Helm" --description="This namespace contains a deployment of RHDG using the official Helm Chart"
+----
+
+Then, modify the `rhdg-chart/infinispan-values.yaml` to configure your deployment:
+[source, bash]
+----
+helm install infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-chart/default-values.yaml
+----
+
+You will be able to authenticate to the cluster using the credentials obtained from the following command:
+[source, bash]
+----
+oc get secret infinispan-generated-secret \
+-o jsonpath="{.data.identities-batch}" | base64 --decode
+----
+
+If you want to make changes, you need to update the values file and use the `helm upgrade` command:
+[source, bash]
+----
+helm upgrade infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-chart/default-values.yaml
+----
 
 
 
 
 
+=== Option 2: Customizing the official Helm Chart
+
+
+
+
+
+
+
+
+For more information, check the following links:
+* https://infinispan.org/docs/helm-chart/main/helm-chart.html[Upstream documentation].
+* https://github.com/infinispan/infinispan-helm-charts[Upstream Helm Chart source code].
+* https://github.com/openshift-helm-charts/charts/tree/main/charts/redhat/redhat/datagrid[Packaged chart Downstream].
+* https://github.com/openshift-helm-charts/charts/tree/main/charts/community/infinispan/infinispan[Pachaged chart Upstream].
 
 
 
