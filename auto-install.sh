@@ -57,7 +57,7 @@ fi
 
 if ! oc get cm cluster-monitoring-config -n openshift-monitoring &> /dev/null; then
     echo -e "Check. Cluster monitoring is missing, creating the monitoring stack..."
-    oc apply -f templates/rhdg-02-ocp-user-workload-monitoring.yaml
+    oc apply -f ocp/ocp-01-user-workload-monitoring.yaml
 else
     echo -e "Check. Cluster monitoring is ready, do nothing."
 fi
@@ -68,7 +68,7 @@ fi
 
 # Deploy the RHDG operator
 echo -e "\n[1/8]Deploying the RHDG operator"
-oc process -f templates/rhdg-01-operator.yaml \
+oc process -f rhdg/rhdg-01-operator.yaml \
     -p OPERATOR_NAMESPACE=$RHDG_OPERATOR_NAMESPACE \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE | oc apply -f -
 
@@ -77,13 +77,13 @@ while [[ $(oc get pods -l name=infinispan-operator -n $RHDG_OPERATOR_NAMESPACE -
 
 # Deploy the RHDG cluster
 echo -e "\n[2/8]Deploying the RHDG cluster"
-oc process -f templates/${OCP_CLUSTER_TEMPLATE}.yaml \
+oc process -f rhdg/${OCP_CLUSTER_TEMPLATE}.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
 # Create basic caches
 echo -e "\n[3/8]Creating basic caches"
-oc process -f templates/rhdg-03-caches.yaml \
+oc process -f rhdg/rhdg-03-caches.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
@@ -95,7 +95,7 @@ oc project rhdg8
 
 # Configure Prometheus to monitor RHDG
 echo -e "\n[4/8]Configure Prometheus to monitor RHDG"
-oc process -f templates/rhdg-04-monitoring.yaml \
+oc process -f rhdg/rhdg-04-monitoring.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME \
     -p SERVICE_MONITOR_HTTP_SCHEME=$SERVICE_MONITOR_HTTP_SCHEME | oc apply -f -
@@ -107,7 +107,7 @@ oc process -f templates/rhdg-04-monitoring.yaml \
 
 # Deploy the Grafana Operator
 echo -e "\n[5/8]Deploying the Grafana operator"
-oc process -f templates/grafana-01-operator.yaml \
+oc process -f grafana/grafana-01-operator.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for pods ready..."
@@ -115,7 +115,7 @@ while [[ $(oc get pods -l control-plane=controller-manager -n $GRAFANA_NAMESPACE
 
 # Create a Grafana instance
 echo -e "\n[6/8]Creating a grafana instance"
-oc process -f templates/grafana-02-instance.yaml \
+oc process -f grafana/grafana-02-instance.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for ServiceAccount ready..."
@@ -126,7 +126,7 @@ BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n $GRAFANA_N
 
 # Create a Grafana data source
 echo -e "\n[7/8]Creating the Grafana data source"
-oc process -f templates/grafana-03-datasource.yaml \
+oc process -f grafana/grafana-03-datasource.yaml \
     -p BEARER_TOKEN=$BEARER_TOKEN \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
@@ -137,7 +137,7 @@ if oc get cm $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE &> /dev/null; then
     oc delete configmap $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE
 fi
 oc create configmap $GRAFANA_DASHBOARD_NAME --from-file=$GRAFANA_DASHBOARD_KEY=grafana/$GRAFANA_DASHBOARD_NAME.json -n $GRAFANA_NAMESPACE
-oc process -f templates/grafana-04-dashboard.yaml \
+oc process -f grafana/grafana-04-dashboard.yaml \
     -p DASHBOARD_NAME=$GRAFANA_DASHBOARD_NAME \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
     -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
