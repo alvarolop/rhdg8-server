@@ -1,0 +1,119 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: rhdg8-alerting-rules
+  annotations:
+    description: Template to configure the alerting rules for user-workloads Prometheus for a RHDG cluster on OCP.
+    tags: infinispan,datagrid,operator
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+  ########################
+  # 
+  # General documentation: 
+  # https://www.prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+  # If you need extra metrics, check the following
+  # https://github.com/google/cadvisor/blame/85796f19bf1986040f2b9644857fd46811b737f6/docs/storage/prometheus.md#L35
+  # Configuration examples
+  # https://awesome-prometheus-alerts.grep.to/rules.html
+  # 
+  ########################
+objects:
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: rhdg-rules
+      namespace: ${CLUSTER_NAMESPACE}
+    spec:
+      groups:
+
+        #
+        # 1. Alert to make sure that DG pods are running
+      - name: keepalive-alerts
+        rules:
+        - alert: RhdgPodsAreReady
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" is ready"
+            summary: "DG member \"{{ $labels.pod }}\" is ready"
+          expr: 'kube_pod_status_ready{namespace="${CLUSTER_NAMESPACE}",condition="true"} == 1'
+          for: 0m
+          labels:
+            severity: none
+        - alert: RhdgPodsAreNotReady
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" is not ready"
+            summary: "DG member \"{{ $labels.pod }}\" is not ready"
+          expr: 'kube_pod_status_ready{namespace="${CLUSTER_NAMESPACE}",condition="true"} != 1'
+          for: 0m
+          labels:
+            severity: warning
+
+        #
+        # 2. Alerts related to container metrics
+      - name: container-alerts
+        rules:
+          # OLD: "(process_max_fds - process_open_fds) < 2000"
+        - alert: RhdgServerHasTooManyFDsOpened
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" has too many file descriptors opened"
+            summary: "DG member \"{{ $labels.pod }}\" has too many file descriptors opened"
+          expr: 'container_file_descriptors{namespace="${CLUSTER_NAMESPACE}", container="infinispan"} > 400'
+          for: 10s
+          labels:
+            severity: warning
+
+        - alert: RhdgCpuUsageIsTooHigh
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" has a CPU usage over 1 CPU"
+            summary: "DG member \"{{ $labels.pod }}\" has a CPU usage over 1 CPU"
+          expr: 'avg_over_time(pod:container_cpu_usage:sum{namespace="${CLUSTER_NAMESPACE}"}[30s]) > 1'
+          for: 1m
+          labels:
+            severity: critical
+
+        #
+        # 3. Alerts related to the JVM
+      - name: jvm-alerts
+        rules:
+        - alert: HighGarbageCollectionTimes
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" has GC times over 100ms"
+            summary: "DG member \"{{ $labels.pod }}\" has GC times over 100ms"
+          expr: "base_gc_time_total_seconds > 100"
+          for: 1m
+          labels:
+            severity: critical
+
+        - alert: MissesBiggerThanHits
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" had more misses than hits in the past 30s"
+            summary: "DG member \"{{ $labels.pod }}\" had more misses than hits in the past 30s"
+          expr: 'avg_over_time(vendor_cache_manager_default_cache_container_stats_misses[30s]) > avg_over_time(vendor_cache_manager_default_cache_container_stats_hits[30s])'
+          for: 0m
+          labels:
+            severity: warning
+
+        - alert: HighEvictionRate
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" had more misses than hits in the past 30s"
+            summary: "DG member \"{{ $labels.pod }}\" had more misses than hits in the past 30s"
+          # The following comparison needs different avg times, as we need to compare with the previous entries
+          expr: 'avg_over_time(vendor_cache_manager_default_cache_container_stats_evictions[10s]) > avg_over_time(vendor_cache_manager_default_cache_container_stats_number_of_entries[30s]) * 0.5'
+          for: 10s
+          labels:
+            severity: warning
+
+        - alert: HighAverageReadTime
+          annotations:
+            description: "DG member \"{{ $labels.pod }}\" had average read times bigger than 5ms"
+            summary: "DG member \"{{ $labels.pod }}\" had average read times bigger than 5ms"
+          expr: 'avg_over_time(vendor_cache_manager_default_cache_container_stats_average_read_time[10s]) > 40'
+          for: 0m
+          labels:
+            severity: warning
+
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8"

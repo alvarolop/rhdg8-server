@@ -406,6 +406,16 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 
 
+== Alerting with PrometheusRules
+
+
+[source, bash]
+----
+oc process -f templates/rhdg-05-alerting-rules.yaml | oc apply -f -
+----
+
+
+
 
 :sectnums!:
 
@@ -592,6 +602,41 @@ oc create secret generic rhdg-xsite-01-xsite-secret -n rhdg8-xsite-02 --from-lit
 oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-01 --from-literal=token=${TOKEN_XSITE_02}
 oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-02 --from-literal=token=${TOKEN_XSITE_02}
 ----
+
+
+
+== Annex: Retrieve server reports from Openshift
+
+
+[source, bash]
+----
+oc project $RHDG_NAMESPACE
+for pod in $(oc get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
+do
+  echo "$pod: Generate report"
+  oc exec $pod -- bash -c 'echo "server report" | ./bin/cli.sh -c $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN -f -'
+  echo "$pod: Download report"
+  oc exec $pod -- bash -c 'files=( *tar.gz* ); cat "${files[0]}"' > $(date +"%Y-%m-%d-%H-%M")-$pod-report.tar.gz
+  echo "$pod: Remove report"
+  oc exec rhdg-0 -- bash -c 'rm -rf *tar.gz*'
+done
+----
+
+
+== Annex: Retrieve Queries stats
+
+[source, bash]
+----
+oc project $RHDG_NAMESPACE
+for pod in $(oc get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
+do
+  echo "$pod: Get stats"
+  oc exec $pod -- bash -c 'curl $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN/rest/v2/$CACHE_NAME/operator-cache-01/search/stats' | jq
+done
+----
+
+
+
 
 
 
