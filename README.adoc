@@ -688,19 +688,23 @@ oc create secret generic rhdg-xsite-02-xsite-secret -n rhdg8-xsite-02 --from-lit
 
 === Retrieve Queries stats
 
+Since Infinispan 12, Data Grid https://infinispan.org/docs/stable/titles/query/query.html#getting-query-statistics_query-monitoring-tuning[includes metrics] specifically related to Queries on the server side. Retrieve them using the following script:
+
 [source, bash]
 ----
+CACHE_NAME="operator-cache-01"
 oc project $RHDG_NAMESPACE
 for pod in $(oc get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
 do
   echo "$pod: Get stats"
-  oc exec $pod -- bash -c 'curl $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN/rest/v2/$CACHE_NAME/operator-cache-01/search/stats' | jq
+  oc exec $pod -- bash -c 'curl $HOSTNAME:$RHDG_SERVICE_PORT_INFINISPAN/rest/v2/caches/$CACHE_NAME/search/stats' | jq
 done
 ----
 
 
 === Retrieve server reports from Openshift
 
+Since Infinispan 12, Data Grid includes an option to https://github.com/infinispan/infinispan/blob/13.0.0.Final/server/runtime/src/main/server/bin/report.sh[download a server report] from each pod. Retrieve it using the following script:
 
 [source, bash]
 ----
