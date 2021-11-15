@@ -4,7 +4,7 @@ set -e
 
 # Set your environment variables here
 RHDG_OPERATOR_NAMESPACE=rhdg8-operator
-RHDG_NAMESPACE=rhdg8
+RHDG_NAMESPACE=my-rhdg8
 RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD_NAME="grafana-dashboard-rhdg8"
@@ -77,17 +77,17 @@ while [[ $(oc get pods -l name=infinispan-operator -n $RHDG_OPERATOR_NAMESPACE -
 
 # Deploy the RHDG cluster
 echo -e "\n[2/8]Deploying the RHDG cluster"
-oc process -f rhdg-operato/${OCP_CLUSTER_TEMPLATE}.yaml \
+oc process -f rhdg-operator/${OCP_CLUSTER_TEMPLATE}.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
 # Create basic caches
 echo -e "\n[3/8]Creating basic caches"
-oc process -f rhdg-operato/rhdg-03-caches.yaml \
+oc process -f rhdg-operator/rhdg-03-caches.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
-oc project rhdg8
+oc project $RHDG_NAMESPACE
 
 ##
 # 2) PROMETHEUS
@@ -95,7 +95,7 @@ oc project rhdg8
 
 # Configure Prometheus to monitor RHDG
 echo -e "\n[4/8]Configure Prometheus to monitor RHDG"
-oc process -f rhdg-operato/rhdg-04-monitoring.yaml \
+oc process -f rhdg-operator/rhdg-04-monitoring.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME \
     -p SERVICE_MONITOR_HTTP_SCHEME=$SERVICE_MONITOR_HTTP_SCHEME | oc apply -f -
