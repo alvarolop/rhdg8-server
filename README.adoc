@@ -1,6 +1,9 @@
 = Red Hat Data Grid 8 server
 Álvaro López Medina <alopezme@redhat.com>
 v1.0, 2020-11
+// Metadata
+:description: This document shows how to perform basic installations of Red Hat Data Grid customizing its configuration.
+:keywords: infinispan, datagrid, openshift, red hat
 // Create TOC wherever needed
 :toc: macro
 :sectanchors:
@@ -20,6 +23,9 @@ ifndef::env-github[]
 :icons: font
 endif::[]
 // End: Enable admonition icons
+// Refs
+:rhel-downloaded-filename: redhat-datagrid-8.2.0-server
+:rhel-server-path: redhat-datagrid-8.2.1-server
 
 This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster on OCP and RHEL. 
 
@@ -80,22 +86,22 @@ This section explains how to configure, run, and monitor Data Grid servers. The 
 This is the basic installation option, valid for basic exploration and development purposes. Follow these steps to run the server in this mode:
 
 .Unzip the server
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-cd ~/Downloads
-unzip redhat-datagrid-8.2.0-server.zip
+cd ~/Downloads 
+unzip {rhel-downloaded-filename}.zip
 ----
 
 .Create the developer user
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer
+./{rhel-server-path}/bin/cli.sh user create developer -p developer
 ----
 
 .Launch the server
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-./redhat-datagrid-8.2.0-server/bin/server.sh 
+./{rhel-server-path}/bin/server.sh 
 2021-06-22 15:27:20,379 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.11+9
 [...]
 2021-06-22 15:27:30,674 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SINGLE_PORT (default) listening on 127.0.0.1:11222
@@ -109,37 +115,37 @@ unzip redhat-datagrid-8.2.0-server.zip
 Unzip the server as in the previous example, locate the folder named `server`, duplicate it and then use one with each server instance. 
 
 .Unzip the server
-[source, bash]
+[source, bash, subs="attributes"]
 ----
 cd ~/Downloads
-unzip redhat-datagrid-8.2.0-server.zip
+unzip {rhel-downloaded-filename}.zip
 ----
 
 .Duplicate the server config
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-cp -r redhat-datagrid-8.2.0-server/server redhat-datagrid-8.2.0-server/server-01
-cp -r redhat-datagrid-8.2.0-server/server redhat-datagrid-8.2.0-server/server-02
+cp -r {rhel-server-path}/server {rhel-server-path}/server-01
+cp -r {rhel-server-path}/server {rhel-server-path}/server-02
 ----
 
 
 .Create the developer user in both instances
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer --server-root=server-01
-./redhat-datagrid-8.2.0-server/bin/cli.sh user create developer -p developer --server-root=server-02
+./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin --server-root=server-01
+./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin --server-root=server-02
 ----
 
 
 .Launch both server instances
-[source, bash]
+[source, bash, subs="attributes"]
 ----
-./redhat-datagrid-8.2.0-server/bin/server.sh --node-name=node-01 --server-root=redhat-datagrid-8.2.0-server/server-01 --port-offset=0
-./redhat-datagrid-8.2.0-server/bin/server.sh --node-name=node-02 --server-root=redhat-datagrid-8.2.0-server/server-02 --port-offset=100
+./{rhel-server-path}/bin/server.sh --node-name=node-01 --server-root={rhel-server-path}/server-01 --port-offset=0
+./{rhel-server-path}/bin/server.sh --node-name=node-02 --server-root={rhel-server-path}/server-02 --port-offset=100
 ----
 
 After running both commands, you will see in both terminals similar logs to the ones shown below:
-[source, bash]
+[source, bash, subs="attributes"]
 ----
 [...]
 2021-06-22 15:29:23,421 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
@@ -399,6 +405,8 @@ helm upgrade infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-char
 
 
 === Option 2: Customizing the official Helm Chart
+
+To customize the Helm Chart, you will need to fork the official upstream chart adn modify the configuration needed. In my case, I have forked it https://github.com/alvarolop/infinispan-helm-charts?organization=alvarolop&organization=alvarolop[here], in order to change several aspects of the configuration.
 
 
 
