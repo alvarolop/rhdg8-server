@@ -92,10 +92,16 @@ cd ~/Downloads
 unzip {rhel-downloaded-filename}.zip
 ----
 
+.Install the server patch
+[source, bash]
+----
+./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
+----
+
 .Create the developer user
 [source, bash, subs="attributes"]
 ----
-./{rhel-server-path}/bin/cli.sh user create developer -p developer
+./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin
 ----
 
 .Launch the server
@@ -119,6 +125,12 @@ Unzip the server as in the previous example, locate the folder named `server`, d
 ----
 cd ~/Downloads
 unzip {rhel-downloaded-filename}.zip
+----
+
+.Install the server patch
+[source, bash]
+----
+./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
 ----
 
 .Duplicate the server config
@@ -361,6 +373,11 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 
 
+
+
+
+
+
 == Deploying RHDG on OCP using Helm Charts
 
 Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let’s have a look at an example.
@@ -399,6 +416,14 @@ If you want to make changes, you need to update the values file and use the `hel
 ----
 helm upgrade infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-chart/default-values.yaml
 ----
+
+
+If you want to customize the server deployment (The `infinispan.yaml` file), you will need to provide server configuration in YAML format. Documentation is not fully GA yet, so you can use the following examples:
+
+* `rhdg-chart/default-values.yaml`: Example provided in the https://github.com/infinispan/infinispan-helm-charts/blob/0.2.0/values.yaml[Helm Charts GitHub repository].
+* `extras/config/server-example-infinispan.yaml`: Example provided as a testing file for the server in the https://github.com/infinispan/infinispan/blob/13.0.2.Final/server/runtime/src/test/resources/configuration/ServerConfigurationParserTest.yaml[Infinispan GitHub repository]. 
+* `extras/config/default-operator-infinispan.yaml`: Example obtained from the RHDG image for Infinispan 13.0.2.Final.
+* https://infinispan.org/docs/infinispan-operator/main/operator.html#infinispan-configuration_configuring-clusters[Upstream documentation] with examples.
 
 
 
@@ -730,7 +755,54 @@ done
 
 
 
+== Annex: Convert cache configurations
 
+In Data Grid 7, caches were defined in XML format. Since RHDG 8, it is possible to use XML, JSON or YAML. The server includes some tools to automatically convert from one to the other.
+
+[source, bash]
+----
+CACHE_NAME="___protobuf_metadata"
+# Get in XML
+curl --digest -u developer:$DEV_PASS -H "Accept: application/xml" $INFINISPAN_SERVICE_HOST:11222/rest/v2/caches/$CACHE_NAME?action=config
+# Get in JSON
+curl --digest -u developer:$DEV_PASS -H "Accept: application/json" $INFINISPAN_SERVICE_HOST:11222/rest/v2/caches/$CACHE_NAME?action=config
+# Get in YAML
+curl --digest -u developer:$DEV_PASS -H "Accept: application/yaml" $INFINISPAN_SERVICE_HOST:11222/rest/v2/caches/$CACHE_NAME?action=config
+----
+
+
+So, if you need to convert many caches from XML to YAML, you can create a server with all of them in XML and then retrieve them in YAML.
+
+
+
+== Annex: Getting full CR example
+
+1. Download the Infinispan CRD:
+[source, bash]
+----
+# Infinispan Operator 2.1.X
+URL="https://raw.githubusercontent.com/infinispan/infinispan-operator/2.1.x/deploy/crds/infinispan.org_infinispans_crd.yaml"
+
+# Infinispan Operator 2.2.X
+URL="https://raw.githubusercontent.com/infinispan/infinispan-operator/2.2.x/config/crd/bases/infinispan.org_infinispans.yaml"
+
+curl -o rhdg-crds/infinispan-2.2.x.yaml $URL
+----
++
+2. Edit the file in order to create a new CRD instead of modify the previous one
++
+3. Create the object in the cluster:
++,
+[source, bash]
+----
+oc apply -f rhdg-crds/infinispan-2.2.x.yaml
+----
++
+4. Get the full list of options:
+[source, bash]
+----
+oc explain custominfinispan --recursive
+----
 
 
 
