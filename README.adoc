@@ -429,22 +429,62 @@ If you want to customize the server deployment (The `infinispan.yaml` file), you
 
 
 
+
+
 === Option 2: Customizing the official Helm Chart
 
-To customize the Helm Chart, you will need to fork the official upstream chart adn modify the configuration needed. In my case, I have forked it https://github.com/alvarolop/infinispan-helm-charts?organization=alvarolop&organization=alvarolop[here], in order to change several aspects of the configuration.
+To customize the Helm Chart, you will need to fork the official upstream chart adn modify the configuration needed. In my case, I have forked it https://github.com/alvarolop/infinispan-helm-charts[here], in order to change several aspects of the configuration.
 
 
 
+1. Clone your own git repo in the parent folder:
+[source, bash]
+----
+cd ..
+git clone https://github.com/alvarolop/infinispan-helm-charts.git
+cd infinispan-helm-charts
+----
++
+2. Create a new OCP project:
+[source, bash]
+----
+oc new-project rhdg8-helm-customized --display-name="RHDG 8 - Helm Customized" --description="This namespace contains a deployment of RHDG using a customized Helm Chart"
+----
++
+3. In order to deploy this unpackaged version of the Helm Chart, you just have to use Helm to render the OCP objects using the default values file and apply the result in your OCP cluster:
+[source, bash]
+----
+helm template --validate --set deploy.nameOverride="infinispan" . | oc apply -f -
+----
 
+Alternatively, you can use the `values.yaml` files defined in this repository: 
+[source, bash]
+----
+helm template --validate --set deploy.nameOverride="infinispan" -f ../rhdg8-server/rhdg-chart/default-values.yaml . | oc apply -f -
+----
 
+[NOTE]
+====
+In the previous commands, you need the following parameters:
+* `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` do validate by default, that is why this param is only necessary in this section).
+* `--set deploy.nameOverride="infinispan"`: By default, the packaged Helm Chart uses the name of the package `infinispan`. As this is not the packaged version, the name defaults to RELEASE-NAME which is not a lowercase RFC 1123 subdomain. 
+====
 
 
 
 For more information, check the following links:
+
 * https://infinispan.org/docs/helm-chart/main/helm-chart.html[Upstream documentation].
 * https://github.com/infinispan/infinispan-helm-charts[Upstream Helm Chart source code].
 * https://github.com/openshift-helm-charts/charts/tree/main/charts/redhat/redhat/datagrid[Packaged chart Downstream].
 * https://github.com/openshift-helm-charts/charts/tree/main/charts/community/infinispan/infinispan[Pachaged chart Upstream].
+
+
+
+
+
+
+
 
 
 
