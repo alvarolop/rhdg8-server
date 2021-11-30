@@ -49,7 +49,7 @@ objects:
           - action: labelmap
             regex: __meta_kubernetes_service_label_prometheus_(.+)
             # regex: __meta_kubernetes_pod_label_prometheus_(.+)
-        scheme: http
+        scheme: ${SERVICE_MONITOR_HTTP_SCHEME}
         scrapeTimeout: 10s
       namespaceSelector:
         matchNames:
