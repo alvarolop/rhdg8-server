@@ -24,8 +24,8 @@ ifndef::env-github[]
 endif::[]
 // End: Enable admonition icons
 // Refs
-:rhel-downloaded-filename: redhat-datagrid-8.2.0-server
-:rhel-server-path: redhat-datagrid-8.2.1-server
+:rhel-downloaded-filename: redhat-datagrid-8.3.0-server
+:rhel-server-path: redhat-datagrid-8.3.0-server
 
 This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster on OCP and RHEL. 
 
@@ -92,11 +92,11 @@ cd ~/Downloads
 unzip {rhel-downloaded-filename}.zip
 ----
 
-.Install the server patch
-[source, bash]
-----
-./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
-----
+// .Install the server patch
+// [source, bash]
+// ----
+// ./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
+// ----
 
 .Create the developer user
 [source, bash, subs="attributes"]
@@ -108,11 +108,11 @@ unzip {rhel-downloaded-filename}.zip
 [source, bash, subs="attributes"]
 ----
 ./{rhel-server-path}/bin/server.sh 
-2021-06-22 15:27:20,379 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.11+9
+2022-02-14 18:36:43,541 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.14+9
 [...]
-2021-06-22 15:27:30,674 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SINGLE_PORT (default) listening on 127.0.0.1:11222
-2021-06-22 15:27:30,674 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat-59097' listening on http://127.0.0.1:11222
-2021-06-22 15:27:30,773 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.2.0.GA started in 10278ms
+2022-02-14 18:36:48,086 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SinglePort (default) listening on 127.0.0.1:11222
+2022-02-14 18:36:48,087 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat2-29797' listening on http://127.0.0.1:11222
+2022-02-14 18:36:48,126 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.3.0.GA started in 4526ms
 ----
 
 
@@ -127,11 +127,11 @@ cd ~/Downloads
 unzip {rhel-downloaded-filename}.zip
 ----
 
-.Install the server patch
-[source, bash]
-----
-./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
-----
+// .Install the server patch
+// [source, bash]
+// ----
+// ./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
+// ----
 
 .Duplicate the server config
 [source, bash, subs="attributes"]
@@ -160,13 +160,13 @@ After running both commands, you will see in both terminals similar logs to the 
 [source, bash, subs="attributes"]
 ----
 [...]
-2021-06-22 15:29:23,421 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
-2021-06-22 15:29:23,549 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.2.0.GA started in 19445ms
-2021-06-22 15:29:25,058 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
-2021-06-22 15:29:25,112 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
-2021-06-22 15:29:27,100 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
+2022-02-14 18:38:04,606 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
+2022-02-14 18:38:04,720 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.3.0.GA started in 5521ms
+2022-02-14 18:38:12,903 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
+2022-02-14 18:38:12,912 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
+2022-02-14 18:38:13,621 INFO  (jgroups-12,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
 [...]
-2021-06-22 15:29:29,175 INFO  (jgroups-12,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
+2022-02-14 18:38:14,457 INFO  (jgroups-14,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
 ----
 
 
@@ -685,6 +685,12 @@ The same configuration rules from the previous chapter apply.
 ----
 oc process -f rhdg-operator/infinispan-01-operator.yaml -p OPERATOR_NAMESPACE="infinispan-operator" -p CLUSTER_NAMESPACE="infinispan" | oc apply -f -
 ----
+
+[source, bash, linenums]
+----
+oc process -f rhdg-operator/rhdg-02-cluster-basic.yaml -p CLUSTER_NAMESPACE="infinispan" -p CLUSTER_NAME="rhdg" | oc apply -f -
+----
+
 
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.1/html-single/running_data_grid_on_openshift/index#installation[documentation].
 

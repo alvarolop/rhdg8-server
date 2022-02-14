@@ -37,7 +37,7 @@ objects:
     name: datagrid-operator
     namespace: ${OPERATOR_NAMESPACE}
   spec:
-    channel: 2.1.x
+    channel: 2.2.x
     installPlanApproval: Automatic
     name: infinispan
     source: community-operators
