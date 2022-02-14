@@ -20,17 +20,14 @@ objects:
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-01
     template: >-
-      <infinispan>
-        <cache-container>
-          <distributed-cache name="doesnotapply" owners="1" mode="ASYNC" statistics="true">
-            <state-transfer enabled="false"/>
-            <memory>
-              <binary eviction="MEMORY" size="400000000"/> <!-- 400 MB -->
-            </memory>
-            <expiration lifespan="600000"/> <!-- 10 min -->
-          </distributed-cache>
-        </cache-container>
-      </infinispan>
+      <distributed-cache name="doesnotapply" owners="1" mode="ASYNC" statistics="true">
+        <encoding media-type="application/x-protostream"/>
+        <state-transfer enabled="false"/>
+        <memory>
+          <binary eviction="MEMORY" size="400000000"/> <!-- 400 MB -->
+        </memory>
+        <expiration lifespan="600000"/> <!-- 10 min -->
+      </distributed-cache>
 - apiVersion: infinispan.org/v2alpha1
   kind: Cache
   metadata:
@@ -41,7 +38,7 @@ objects:
   spec:
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-02
-    templateName: org.infinispan.DIST_SYNC
+    templateName: proto-dist-template
 parameters:
 - name: CLUSTER_NAMESPACE
   description: "The project where the RHDG cluster will be installed."
