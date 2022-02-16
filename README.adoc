@@ -702,6 +702,9 @@ done
 
 In Data Grid 7, caches were defined in XML format. Since RHDG 8, it is possible to use XML, JSON or YAML. The server includes some tools to automatically convert from one to the other.
 
+
+=== Option 1: Cache already exists in the cluster
+
 [source, bash]
 ----
 CACHE_NAME="___protobuf_metadata"
@@ -714,7 +717,40 @@ curl --digest -u developer:$DEV_PASS -H "Accept: application/yaml" $INFINISPAN_S
 ----
 
 
-So, if you need to convert many caches from XML to YAML, you can create a server with all of them in XML and then retrieve them in YAML.
+=== Option 2: The cache is not in the cluster
+
+The following example converts a XML definition to YAML:
+[source, bash]
+----
+curl localhost:11222/rest/v2/caches?action=convert\
+  --digest -u developer:developer \
+  -X POST \
+  -H "Accept: application/yaml" \
+  -H "Content-Type: application/xml" \
+  -d '<?xml version="1.0" encoding="UTF-8"?><replicated-cache mode="SYNC" statistics="false"><encoding media-type="application/x-protostream"/><expiration lifespan="300000" /><memory max-size="400MB" when-full="REMOVE"/><state-transfer enabled="true" await-initial-transfer="false"/></replicated-cache>'
+----
+
+The result is the following YAML:
+
+[source, yaml]
+----
+replicatedCache:
+  mode: "SYNC"
+  statistics: "false"
+  encoding:
+    key:
+      mediaType: "application/x-protostream"
+    value:
+      mediaType: "application/x-protostream"
+  expiration:
+    lifespan: "300000"
+  memory:
+    maxSize: "400MB"
+    whenFull: "REMOVE"
+  stateTransfer:
+    enabled: "true"
+    awaitInitialTransfer: "false"
+----
 
 
 
