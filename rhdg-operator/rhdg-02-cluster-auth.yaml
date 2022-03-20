@@ -22,10 +22,16 @@ objects:
       credentials:
       - username: developer
         password: developer
-      - username: user01
-        password: user01
-      - username: mysecondusername
-        password: changeme-two
+        roles:
+          - application
+      - username: admin
+        password: changeme
+        roles:
+          - admin
+      - username: deployeruser
+        password: changeme
+        roles:
+          - deployer
 - apiVersion: infinispan.org/v1
   kind: Infinispan
   metadata:
@@ -102,8 +108,8 @@ objects:
       #   org.jgroups: debug
     replicas: 1
     security:
-      # authorization:
-      #   enabled: true
+      authorization:
+        enabled: true
       #   roles:
       #     - name: ""
       #       permissions:
