@@ -73,7 +73,7 @@ oc process -f rhdg-operator/rhdg-01-operator.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for pods ready..."
-while [[ $(oc get pods -l name=infinispan-operator -n $RHDG_OPERATOR_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
+while [[ $(oc get pods -l "app.kubernetes.io/name=infinispan-operator" -n $RHDG_OPERATOR_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
 
 # Deploy the RHDG cluster
 echo -e "\n[2/8]Deploying the RHDG cluster"
