@@ -371,7 +371,7 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 
 
-== Deploying RHDG on OCP using Helm Charts [Outdated to DG 8.2]
+== Deploying RHDG on OCP using Helm Charts
 
 Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let's have a look at an example.
 
@@ -391,27 +391,27 @@ Create a new OCP project:
 oc new-project rhdg8-helm --display-name="RHDG 8 - Helm" --description="This namespace contains a deployment of RHDG using the official Helm Chart"
 ----
 
-Then, modify the `rhdg-chart/infinispan-values.yaml` to configure your deployment:
+Then, modify the `rhdg-chart/default-values.yaml` to configure your deployment:
 [source, bash]
 ----
-helm install infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-chart/default-values.yaml
+helm install rhdg openshift-helm-charts/redhat-data-grid -f rhdg-chart/minimal-values.yaml
 ----
 
 You will be able to authenticate to the cluster using the credentials obtained from the following command:
 [source, bash]
 ----
-oc get secret infinispan-generated-secret \
+oc get secret rhdg-generated-secret \
 -o jsonpath="{.data.identities-batch}" | base64 --decode
 ----
 
 If you want to make changes, you need to update the values file and use the `helm upgrade` command:
 [source, bash]
 ----
-helm upgrade infinispan openshift-helm-charts/infinispan-infinispan -f rhdg-chart/default-values.yaml
+helm upgrade rhdg openshift-helm-charts/redhat-data-grid -f rhdg-chart/default-values.yaml
 ----
 
 
-If you want to customize the server deployment (The `infinispan.yaml` file), you will need to provide server configuration in YAML format. Documentation is not fully GA yet, so you can use the following examples:
+If you want to customize the server deployment (The `infinispan.yaml` file), you will need to provide server configuration in YAML format. You can use the following examples:
 
 * `rhdg-chart/default-values.yaml`: Example provided in the https://github.com/infinispan/infinispan-helm-charts/blob/0.2.0/values.yaml[Helm Charts GitHub repository].
 * `extras/config/server-example-infinispan.yaml`: Example provided as a testing file for the server in the https://github.com/infinispan/infinispan/blob/13.0.2.Final/server/runtime/src/test/resources/configuration/ServerConfigurationParserTest.yaml[Infinispan GitHub repository]. 
@@ -459,7 +459,7 @@ helm template --validate --set deploy.nameOverride="infinispan" -f ../rhdg8-serv
 [NOTE]
 ====
 In the previous commands, you need the following parameters:
-* `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` do validate by default, that is why this param is only necessary in this section).
+* `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` does validate by default, that is why this param is only necessary in this section).
 * `--set deploy.nameOverride="infinispan"`: By default, the packaged Helm Chart uses the name of the package `infinispan`. As this is not the packaged version, the name defaults to RELEASE-NAME which is not a lowercase RFC 1123 subdomain. 
 ====
 
@@ -526,12 +526,12 @@ oc create configmap $DASHBOARD_NAME --from-file=dashboard=grafana/$DASHBOARD_NAM
 oc process -f grafana/grafana-04-dashboard.yaml -p DASHBOARD_NAME=$DASHBOARD_NAME | oc apply -f -
 ----
 
-NOTE: https://github.com/grafana-operator/grafana-operator/blob/master/deploy/examples/dashboards[Here] you can find information of other ways of creating dashboards.
+NOTE: https://github.com/grafana-operator/grafana-operator/blob/master/deploy/examples/dashboards[Here] you can find information on other ways of creating dashboards.
 
 
 === Access Grafana as admin
 
-After accessing Grafana using the OCP SSO, you may log in as admin. Retrieve the credentials from the secret using the following commands:
+After accessing Grafana using the OCP SSO, you may log in as `admin`. Retrieve the credentials from the secret using the following commands:
 [source, bash]
 ----
 oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode
@@ -591,7 +591,7 @@ If you want to modify the default behavior of the template provided in this repo
       - ${CLUSTER_NAMESPACE-2}
 ----
 
-3) *SingleNamespace*: The Operator can be a member of an Operator group that selects one namespace. This is useful if we want every application (Each OCP namespace) to be able to configure and deploy their own DG clusters:
+3) *SingleNamespace*: The Operator can be a member of an Operator group that selects one namespace. This is useful if we want every application (Each OCP namespace) to be able to configure and deploy its own DG clusters:
 
 [source, yaml]
 ----
@@ -611,7 +611,7 @@ For more information, check the Openshift https://docs.openshift.com/container-p
 
 == Annex: Stern - Tail logs from multiple pods
 
-In some situations, you will need to monitor logs from several pods of the same application and maybe you want to check to which pod did the request arrived. https://github.com/wercker/stern[Stern] allows you to tail multiple pods on Kubernetes and multiple containers within the pod. Each result is color coded for quicker debugging.
+In some situations, you will need to monitor logs from several pods of the same application and maybe you want to check to which pod the request arrived. https://github.com/wercker/stern[Stern] allows you to tail multiple pods on Kubernetes and multiple containers within the pod. Each result is color coded for quicker debugging.
 
 First, you will need to install it on your machine. After that, log in to your cluster and monitoring the previous deployment is as simple as executing the following command:
 
@@ -620,9 +620,7 @@ First, you will need to install it on your machine. After that, log in to your c
 stern --namespace=$CLUSTER_NAMESPACE -l clusterName=$CLUSTER_NAME
 ----
 
-The previous command will show all the logs from all the pods from a namespace that contain a given label. 
-
-There are many filters and configuration options. Check the https://github.com/wercker/stern#cli-flags[documentation] for a full list of them
+The previous command will show all the logs from all the pods from a namespace that contains a given label. There are many filters and configuration options. Check the https://github.com/wercker/stern#cli-flags[documentation] for a full list of them
 
 
 
@@ -657,7 +655,7 @@ It is also possible to install the operator from the web console. For more infor
 
 === Retrieve Queries stats
 
-Since Infinispan 12, Data Grid https://infinispan.org/docs/stable/titles/query/query.html#getting-query-statistics_query-monitoring-tuning[includes metrics] specifically related to Queries on the server side. Retrieve them using the following script:
+Since Infinispan 12.0, Data Grid https://infinispan.org/docs/stable/titles/query/query.html#getting-query-statistics_query-monitoring-tuning[includes metrics] specifically related to Queries on the server side. Retrieve them using the following script:
 
 [source, bash]
 ----
@@ -673,7 +671,7 @@ done
 
 === Retrieve server reports from Openshift
 
-Since Infinispan 12, Data Grid includes an option to https://github.com/infinispan/infinispan/blob/13.0.0.Final/server/runtime/src/main/server/bin/report.sh[download a server report] from each pod. Retrieve it using the following script:
+Since Infinispan 12.0, Data Grid includes an option to https://github.com/infinispan/infinispan/blob/13.0.0.Final/server/runtime/src/main/server/bin/report.sh[download a server report] from each pod. Retrieve it using the following script:
 
 [source, bash]
 ----
@@ -712,7 +710,7 @@ curl --digest -u developer:$DEV_PASS -H "Accept: application/yaml" $INFINISPAN_S
 
 === Option 2: The cache is not in the cluster
 
-The following example converts a XML definition to YAML:
+The following example converts an XML definition to YAML:
 [source, bash]
 ----
 curl localhost:11222/rest/v2/caches?action=convert\
@@ -761,7 +759,7 @@ URL="https://raw.githubusercontent.com/infinispan/infinispan-operator/2.2.x/conf
 curl -o rhdg-crds/infinispan-2.2.x.yaml $URL
 ----
 +
-2. Edit the file in order to create a new CRD instead of modify the previous one
+2. Edit the file in order to create a new CRD instead of modifying the previous one.
 +
 3. Create the object in the cluster:
 +,

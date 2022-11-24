@@ -1,7 +1,7 @@
 #Build configuration
-images:
-  server: quay.io/infinispan/server:13.0
-  initContainer: registry.access.redhat.com/ubi8-micro
+# images:
+  # server: registry.redhat.io/datagrid/datagrid-8-rhel8:1.3
+  # initContainer: registry.access.redhat.com/ubi8-micro
 #Deployment configuration
 deploy:
   replicas: 2
