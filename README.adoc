@@ -24,8 +24,8 @@ ifndef::env-github[]
 endif::[]
 // End: Enable admonition icons
 // Refs
-:rhel-downloaded-filename: redhat-datagrid-8.3.0-server
-:rhel-server-path: redhat-datagrid-8.3.0-server
+:rhel-downloaded-filename: redhat-datagrid-8.4.0-server
+:rhel-server-path: redhat-datagrid-8.4.0-server
 
 This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster on OCP and RHEL. 
 
@@ -36,7 +36,7 @@ toc::[]
 
 Red Hat Data Grid is an in-memory, distributed, NoSQL datastore solution. Your applications can access, process, and analyze data at in-memory speed to deliver a superior user experience. 
 
-Red Hat Data Grid provides value as a standard architectural component in application infrastructures for a variety of real-world scenarios and use cases:
+Red Hat Data Grid provides value as a standard architectural component in application infrastructures for a variety of real-world scenarios and use-cases:
 
 * Data caching and transient data storage.
 * Primary data store.
@@ -57,7 +57,7 @@ To support modern data management requirements with rapid data processing, elast
 
 * *Comprehensive security*. Authentication, role-based authorization, and access control are integrated with existing security and identity structures to give only trusted users, services, and applications access to the data grid.
 
-* *Cross-datacenter replication*. Replicate applications across datacenters and achieve high availability to meet service-level agreement (SLA) requirements for data within and across datacenters.
+* *Cross-datacenter replication*. Replicate applications across data centers and achieve high availability to meet service-level agreement (SLA) requirements for data within and across data centers.
 
 * *Rolling upgrades*. Upgrade your cluster without downtime for continuous, uninterrupted operations for remote users and applications.
 
@@ -112,7 +112,7 @@ unzip {rhel-downloaded-filename}.zip
 [...]
 2022-02-14 18:36:48,086 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SinglePort (default) listening on 127.0.0.1:11222
 2022-02-14 18:36:48,087 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat2-29797' listening on http://127.0.0.1:11222
-2022-02-14 18:36:48,126 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.3.0.GA started in 4526ms
+2022-02-14 18:36:48,126 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.4.0.GA started in 4526ms
 ----
 
 
@@ -161,7 +161,7 @@ After running both commands, you will see in both terminals similar logs to the 
 ----
 [...]
 2022-02-14 18:38:04,606 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
-2022-02-14 18:38:04,720 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.3.0.GA started in 5521ms
+2022-02-14 18:38:04,720 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.4.0.GA started in 5521ms
 2022-02-14 18:38:12,903 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
 2022-02-14 18:38:12,912 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
 2022-02-14 18:38:13,621 INFO  (jgroups-12,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
@@ -181,9 +181,9 @@ After running both commands, you will see in both terminals similar logs to the 
 
 == Deploying RHDG on OCP using the Operator
 
-An Operator is a method of packaging, deploying and managing a Kubernetes-native application. A Kubernetes-native application is an application that is both deployed on Kubernetes and managed using the Kubernetes APIs and kubectl tooling.
+An Operator is a method of packaging, deploying and managing a Kubernetes-native application. A Kubernetes-native application is an application that is both deployed on Kubernetes and managed using the Kubernetes APIs and `kubectl` tooling.
 
-Install Data Grid Operator into a OpenShift namespace to create and manage Data Grid clusters.
+Install Data Grid Operator into an OpenShift namespace to create and manage Data Grid clusters.
 
 === Deploying the RHDG operator
 
@@ -193,13 +193,13 @@ To deploy the RHDG operator, you will need to create three different objects:
 
 * Two *Openshift projects* that will contain the operator and the objects of the RHDG cluster.
 
-* An *OperatorGroup*, which provides multitenant configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators. As we are not deploying our operator in the default namespace (`openshift-operators`), we will need to create one to set the namespaces where the Data Grid operator will be able to create and monitorize clusters.
+* An *OperatorGroup*, which provides multi-tenancy configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators. As we are not deploying our operator in the default namespace (`openshift-operators`), we will need to create one to set the namespaces where the Data Grid operator will be able to create and monitor clusters.
 
-NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.9/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check <<annex-configure-the-scope-of-your-operator>> before executing the commands of this section.
+NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.11/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check <<annex-configure-the-scope-of-your-operator>> before executing the commands of this section.
 
 * A *Subscription*, which represents an intention to install an Operator. It is the custom resource that relates an Operator to a CatalogSource. Subscriptions describe which channel of an Operator package to subscribe to, and whether to perform updates automatically or manually. 
 
-I have created an OCP template to quickly deploy this operator. Just execute the following command have it up and running on your cluster. 
+I have created an OCP template to quickly deploy this operator. Just execute the following command to have it up and running on your cluster. 
 
 IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy an operator, as it is necessary to create cluster-wide CRDs (Custom Resource Definitions).
 
@@ -208,12 +208,12 @@ IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy
 oc process -f rhdg-operator/rhdg-01-operator.yaml | oc apply -f -
 ----
 
-This template provides two parameters to modify the project where the operator and the cluster is installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
+This template provides two parameters to modify the project where the operator and the cluster are installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
 
 * *OPERATOR_NAMESPACE* = `rhdg8-operator`
 * *CLUSTER_NAMESPACE* = `rhdg8`
 
-Modify them just passing arguments to the template:
+Modify them just by passing arguments to the template:
 
 [source, bash]
 ----
@@ -223,14 +223,14 @@ oc process -f rhdg-operator/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="other-n
 It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/fd77665b-d6df-4e25-a9cd-45fbed6dd6c1[documentation].
 
 
-=== Deploying a RHDG cluster
+=== Deploying an RHDG cluster
 
 Data Grid Operator lets you create, configure, and manage Data Grid clusters. Data Grid Operator adds a new Custom Resource (CR) of type Infinispan that lets you handle Data Grid clusters as complex units on OpenShift.
 
 Data Grid Operator watches for Infinispan Custom Resources (CR) that you use to instantiate and configure Data Grid clusters and manage OpenShift resources, such as StatefulSets and Services. In this way, the Infinispan CR is your primary interface to Data Grid on OpenShift.
 
 
-I have created an OCP template to quickly deploy a basic RHDG cluster with 3 replicas. Execute the following command have it up and running on your cluster. 
+I have created an OCP template to quickly deploy a basic RHDG cluster with 3 replicas. Execute the following command and have it up and running on your cluster. 
 
 
 [source, bash]
@@ -240,11 +240,11 @@ oc process -f rhdg-operator/rhdg-02-cluster.yaml | oc apply -f -
 
 This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
 
-* *CLUSTER_NAMESPACE* = `rhdg8`
-* *CLUSTER_NAME* = `rhdg`
+* *CLUSTER_NAMESPACE* = `rhdg8`.
+* *CLUSTER_NAME* = `rhdg`.
 
 
-Modify them just passing arguments to the template:
+Modify them just by passing arguments to the template:
 
 [source, bash]
 ----
@@ -254,25 +254,18 @@ oc process -f rhdg-operator/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-n
 
 === Creating RHDG caches using the Operator CRD
 
-WARNING: Creating caches with Data Grid Operator is no longer technology preview. However, modifications of the Cache CR does not reflect on the Dat Grid cluster. Therefore, you will have to delete and recreate those CRs manually.
-
-
 Data Grid stores entries into caches, which can be created using several methods: REST, CLI, programmatically using the Java Client or using the `Cache` CRD. In this section, we will explore how to create caches using the Operator.
 
 
 NOTE: For other ways of creating caches, please check this other https://github.com/alvarolop/rhdg8-client#cache-configuration[Git repository] with information about the Data Grid client.
 
-To create caches with Data Grid Operator, you use Cache CRs to add caches from templates or XML configuration. Bear in mind the following constrains:
-
-* You can create a single cache for each `Cache` CR.
-* If you edit caches in the OpenShift Web Console, changes do not take effect on the Data Grid cluster. You must delete the CR and create it again with the new configuration.
-* Deleting Cache CRs in the OpenShift Web Console, does not remove caches from Data Grid clusters. You must delete caches through the console or CLI.
-
+To create caches with Data Grid Operator, you use Cache CRs to add caches from templates or XML configuration. Bear in mind that you can only create a single cache for each `Cache` CR.
 
 I have created an OCP template to quickly set up two caches on the RHDG cluster:
 
-* `operator-cache-01`: Based on an xml configuration.
-* `operator-cache-02`: Based on an already defined templated.
+* `operator-cache-01`: Based on an XML configuration.
+* `operator-cache-02`: Based on a YAML configuration.
+* `operator-cache-03`: Based on an already defined templated.
 
 
 In order to apply this template, just execute the following command:
@@ -283,18 +276,18 @@ oc process -f rhdg-operator/rhdg-03-caches.yaml | oc apply -f -
 
 This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
 
-* *CLUSTER_NAMESPACE* = `rhdg8`
-* *CLUSTER_NAME* = `rhdg`
+* *CLUSTER_NAMESPACE* = `rhdg8`.
+* *CLUSTER_NAME* = `rhdg`.
 
 
-Modify them just passing arguments to the template:
+Modify them just by passing arguments to the template:
 
 [source, bash]
 ----
 oc process -f rhdg-operator/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
-Interact with the newly created caches with he following commands:
+Interact with the newly created caches with the following commands:
 [source, bash]
 ----
 # Set your variables. These are default:
@@ -326,7 +319,7 @@ After installing OpenShift Container Platform 4.6, cluster administrators can op
 .Enabling monitoring for user-defined projects
 [WARNING]
 ==== 
-Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a ConfigMap of the `openshift-monitoring`. You need permissions to create and modify ConfigMaps in this project. You only have to execute this command *once* per OCP cluster. [underline]#Please, do not execute it before checking if this was done before, you can override work from your colleagues#
+Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a ConfigMap of the `openshift-monitoring`. You need permission to create and modify ConfigMaps in this project. You only have to execute this command *once* per OCP cluster. [underline]#Please, do not execute it before checking if this was done before, you can override work from your colleagues#
 
 [source, bash]
 ----
@@ -347,7 +340,7 @@ oc get pods -n openshift-user-workload-monitoring
 // ----
 
 
-I have created an OCP template to quickly configure metrics monitoring of a RHDG cluster. Execute the following command:
+I have created an OCP template to quickly configure metrics monitoring of an RHDG cluster. Execute the following command:
 
 [source, bash]
 ----
@@ -360,14 +353,14 @@ This template provides two parameters to modify the project where the cluster wa
 * *CLUSTER_NAME* = `rhdg`
 
 
-Modify them just passing arguments to the template:
+Modify them just by passing arguments to the template:
 
 [source, bash]
 ----
 oc process -f rhdg-operator/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
 ----
 
-For more information, access the Openshift https://docs.openshift.com/container-platform/4.9/monitoring/monitoring-overview.html[documentation] for the monitoring stack and the RHDG documenation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/990f6af5-2a9c-4af1-afaf-d2ea562c5bf8[configure monitoring] for RHDG 8 on OCP.
+For more information, access the Openshift https://docs.openshift.com/container-platform/4.9/monitoring/monitoring-overview.html[documentation] for the monitoring stack and the RHDG documentation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/990f6af5-2a9c-4af1-afaf-d2ea562c5bf8[configure monitoring] for RHDG 8 on OCP.
 
 
 
@@ -380,7 +373,7 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 == Deploying RHDG on OCP using Helm Charts [Outdated to DG 8.2]
 
-Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let’s have a look at an example.
+Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let's have a look at an example.
 
 === Option 1: Using an official Infinispan Helm Chart release
 

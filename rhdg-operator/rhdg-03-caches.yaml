@@ -23,9 +23,7 @@ objects:
       <distributed-cache name="doesnotapply" owners="1" mode="ASYNC" statistics="true">
         <encoding media-type="application/x-protostream"/>
         <state-transfer enabled="false"/>
-        <memory>
-          <binary eviction="MEMORY" size="400000000"/> <!-- 400 MB -->
-        </memory>
+        <memory max-size="400MB" when-full="REMOVE"/>
         <expiration lifespan="600000"/> <!-- 10 min -->
       </distributed-cache>
 - apiVersion: infinispan.org/v2alpha1
@@ -38,6 +36,29 @@ objects:
   spec:
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-02
+    template: |-
+      distributedCache:
+        owners: "1"
+        mode: SYNC
+        statistics: "true"
+        encoding:
+          key:
+            mediaType: application/x-protostream
+          value:
+            mediaType: application/x-protostream
+        expiration:
+          lifespan: "4000"
+          maxIdle: "-1"
+- apiVersion: infinispan.org/v2alpha1
+  kind: Cache
+  metadata:
+    name: ${CLUSTER_NAME}-operator-cache-03
+    namespace: ${CLUSTER_NAMESPACE}
+    labels:
+      type: middleware
+  spec:
+    clusterName: ${CLUSTER_NAME}
+    name:  operator-cache-03
     templateName: proto-dist-template
 parameters:
 - name: CLUSTER_NAMESPACE

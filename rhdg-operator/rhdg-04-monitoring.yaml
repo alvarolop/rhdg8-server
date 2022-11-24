@@ -45,9 +45,9 @@ objects:
         #   - action: labelmap
         #     regex: __meta_kubernetes_service_label_(.+)
         # Option 3 to inherit all labels starting on prometheus_ from service. The final metric does not contain prometheus_
-        relabelings:
-          - action: labelmap
-            regex: __meta_kubernetes_service_label_prometheus_(.+)
+        # relabelings:
+        #   - action: labelmap
+        #     regex: __meta_kubernetes_service_label_prometheus_(.+)
             # regex: __meta_kubernetes_pod_label_prometheus_(.+)
         scheme: ${SERVICE_MONITOR_HTTP_SCHEME}
         scrapeTimeout: 10s
@@ -55,11 +55,11 @@ objects:
         matchNames:
         - ${CLUSTER_NAMESPACE}
       # Option 1 to inherit specific labels from service
-      # targetLabels:
-      #   - prometheus_domain
+      targetLabels:
+        - domain
       selector:
         matchLabels:
-          app: infinispan-service
+          app: infinispan-service-admin
           clusterName: ${CLUSTER_NAME}
           infinispan_cr: ${CLUSTER_NAME}
 parameters:
