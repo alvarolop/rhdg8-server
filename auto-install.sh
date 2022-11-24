@@ -23,7 +23,7 @@ echo -e " * RHDG_OPERATOR_NAMESPACE: $RHDG_OPERATOR_NAMESPACE"
 echo -e " * RHDG_NAMESPACE: $RHDG_NAMESPACE"
 echo -e " * RHDG_CLUSTER_NAME: $RHDG_CLUSTER_NAME"
 echo -e " * GRAFANA_NAMESPACE: $GRAFANA_NAMESPACE"
-echo -e " * GRAFANA_DASHBOARD: $GRAFANA_DASHBOARD"
+echo -e " * GRAFANA_DASHBOARD_NAME: $GRAFANA_DASHBOARD_NAME"
 echo -e " * RHDG_AUTH_ENABLED: $RHDG_AUTH_ENABLED"
 echo -e " * RHDG_SSL_ENABLED: $RHDG_SSL_ENABLED"
 echo -e "==============\n"
@@ -130,8 +130,20 @@ oc process -f grafana/grafana-03-datasource.yaml \
     -p BEARER_TOKEN=$BEARER_TOKEN \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
-# Create a Grafana dashboard
-echo -e "\n[8/8]Creating the Grafana dashboard"
+# Create the default Grafana dashboard created by the operator
+echo -e "\n[8/8]Creating the default Grafana dashboard"
+if oc get cm grafana-default-operator-dashboard -n $GRAFANA_NAMESPACE &> /dev/null; then
+    echo -e "Check. There was a previous configuration. Deleting..."
+    oc delete configmap grafana-default-operator-dashboard -n $GRAFANA_NAMESPACE
+fi
+oc create configmap grafana-default-operator-dashboard --from-file=$GRAFANA_DASHBOARD_KEY=grafana/grafana-default-operator-dashboard.json -n $GRAFANA_NAMESPACE
+oc process -f grafana/grafana-04-dashboard.yaml \
+    -p DASHBOARD_NAME=grafana-default-operator-dashboard \
+    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
+    -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
+
+# Create an extra Grafana dashboard
+echo -e "\n[8/8]Creating the custom Grafana dashboard"
 if oc get cm $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE &> /dev/null; then
     echo -e "Check. There was a previous configuration. Deleting..."
     oc delete configmap $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE
