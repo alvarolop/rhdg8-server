@@ -9,52 +9,6 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
     openshift.io/support-url: https://access.redhat.com
 objects:
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: grafana-k8s-proxy
-    namespace: ${OPERATOR_NAMESPACE}
-  data:
-    session_secret: Y2hhbmdlIG1lCg==
-  type: Opaque
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    labels:
-      config.openshift.io/inject-trusted-cabundle: "true"
-    name: ocp-injected-certs
-    namespace: ${OPERATOR_NAMESPACE}
-- apiVersion: rbac.authorization.k8s.io/v1
-  kind: ClusterRole
-  metadata:
-    name: grafana-proxy
-    namespace: ${OPERATOR_NAMESPACE}
-  rules:
-    - apiGroups:
-        - authentication.k8s.io
-      resources:
-        - tokenreviews
-      verbs:
-        - create
-    - apiGroups:
-        - authorization.k8s.io
-      resources:
-        - subjectaccessreviews
-      verbs:
-        - create
-- apiVersion: authorization.openshift.io/v1
-  kind: ClusterRoleBinding
-  metadata:
-    name: grafana-proxy
-    namespace: ${OPERATOR_NAMESPACE}
-  roleRef:
-    name: grafana-proxy
-  subjects:
-    - kind: ServiceAccount
-      name: grafana-serviceaccount
-      namespace: ${OPERATOR_NAMESPACE}
-  userNames:
-    - "system:serviceaccount:${OPERATOR_NAMESPACE}:grafana-serviceaccount"
 - apiVersion: integreatly.org/v1alpha1
   kind: Grafana
   metadata:
@@ -67,16 +21,24 @@ objects:
       log:
         mode: "console"
         level: "warn"
+      security:
+        admin_user: "admin"
+        admin_password: "admin"
+      auth.anonymous:
+        enabled: True
       auth:
         disable_login_form: False
         disable_signout_menu: True
       auth.basic:
         enabled: True
-      auth.anonymous:
+      auth.proxy:
         enabled: True
-      security:
-        admin_password: admin
-        admin_user: admin
+        enable_login_token: True
+        header_property: username
+        header_name: X-Forwarded-User
+    dashboardLabelSelector:
+      - matchExpressions:
+          - {key: app, operator: In, values: ["grafana"]}
     containers:
       - args:
           - '-provider=openshift'
@@ -96,49 +58,52 @@ objects:
           - '-openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
           - '-openshift-ca=/etc/grafana-configmaps/ocp-injected-certs/ca-bundle.crt'
           - '-skip-auth-regex=^/metrics'
-        image: 'quay.io/openshift/origin-oauth-proxy:4.6'
+        image: 'quay.io/openshift/origin-oauth-proxy'
         name: grafana-proxy
         ports:
           - containerPort: 9091
-            name: grafana-proxy
+            name: https
         resources: {}
         volumeMounts:
           - mountPath: /etc/tls/private
-            name: secret-grafana-k8s-tls
+            name: secret-grafana-tls
             readOnly: false
           - mountPath: /etc/proxy/secrets
-            name: secret-grafana-k8s-proxy
+            name: secret-grafana-proxy
             readOnly: false
     secrets:
-      - grafana-k8s-tls
-      - grafana-k8s-proxy
+      - grafana-tls
+      - grafana-proxy
     configMaps:
       - ocp-injected-certs
     service:
       ports:
-        - name: grafana-proxy
+        - name: https
           port: 9091
           protocol: TCP
-          targetPort: grafana-proxy
+          targetPort: https
       annotations:
-        service.alpha.openshift.io/serving-cert-secret-name: grafana-k8s-tls
+        service.beta.openshift.io/serving-cert-secret-name: grafana-tls
     ingress:
-      enabled: True
-      labels:
-        app: grafana
-      targetPort: grafana-proxy
-      termination: reencrypt
+      enabled: false
+      # labels:
+      #   app: grafana
+      # targetPort: https
+      # termination: reencrypt
+      # annotations:
+      #   service.beta.openshift.io/serving-cert-secret-name: grafana-tls
     client:
       preferService: True
     serviceAccount:
       annotations:
-        serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"grafana-route"}}'
-    dashboardLabelSelector:
-      - matchExpressions:
-          - key: "app"
-            operator: In
-            values: 
-              - grafana
+        serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"grafana-access"}}'
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 8000Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
 parameters:
 - name: OPERATOR_NAMESPACE
   description: "The project where the operator will be installed."

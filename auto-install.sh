@@ -113,6 +113,13 @@ oc process -f grafana/grafana-01-operator.yaml \
 echo -n "Waiting for pods ready..."
 while [[ $(oc get pods -l control-plane=controller-manager -n $GRAFANA_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
 
+# Create a Grafana configuration
+echo -e "\n[5.5/8]Creating a grafana config"
+oc process -f grafana/grafana-02-config.yaml \
+    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
+
+sleep 5
+
 # Create a Grafana instance
 echo -e "\n[6/8]Creating a grafana instance"
 oc process -f grafana/grafana-02-instance.yaml \
@@ -121,8 +128,11 @@ oc process -f grafana/grafana-02-instance.yaml \
 echo -n "Waiting for ServiceAccount ready..."
 while ! oc get sa grafana-serviceaccount -n $GRAFANA_NAMESPACE &> /dev/null; do   echo -n "." && sleep 1; done; echo -n -e " [OK]\n"
 
-oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount -n $GRAFANA_NAMESPACE
-BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
+# --- In OCP 3.x and OCP 4.10 or lower ---
+# BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
+# --- In OCP 4.11 or higher ---
+# Reason: https://access.redhat.com/solutions/2972601
+BEARER_TOKEN=$(oc create token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
 
 # Create a Grafana data source
 echo -e "\n[7/8]Creating the Grafana data source"
