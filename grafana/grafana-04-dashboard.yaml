@@ -21,7 +21,7 @@ objects:
     configMapRef:
       name: ${DASHBOARD_NAME}
       key: ${DASHBOARD_KEY}
-    customFolderName: "RHDG 8 - Monitoring"
+    customFolderName: ${CUSTOM_FOLDER_NAME}
     datasources:
       - inputName: "DS_PROMETHEUS"
         datasourceName: "Prometheus"
@@ -40,3 +40,7 @@ parameters:
   description: "The name of the json file inside the ConfigMap."
   required: false
   value: "dashboard.json"
+- name: CUSTOM_FOLDER_NAME
+  description: "The name of internal Grafana folder."
+  required: false
+  value: "RHDG 8 - Monitoring"
