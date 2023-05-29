@@ -88,8 +88,9 @@ objects:
   spec:
     port:
       targetPort: grafana
-    # tls:
-    #   termination: edge
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
     to:
       kind: Service
       name: grafana-service
