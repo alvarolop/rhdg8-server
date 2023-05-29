@@ -132,7 +132,8 @@ while ! oc get sa grafana-serviceaccount -n $GRAFANA_NAMESPACE &> /dev/null; do 
 # BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
 # --- In OCP 4.11 or higher ---
 # Reason: https://access.redhat.com/solutions/2972601
-BEARER_TOKEN=$(oc create token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
+# We don't use the `oc create token` as this token expires after 15m
+BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-serviceaccount -n $GRAFANA_NAMESPACE | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
 
 # Create a Grafana data source
 echo -e "\n[7/8]Creating the Grafana data source"
