@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="InfinispanServerConfig" monitorInterval="60" shutdownHook="disable">
+  <Appenders>
+    <!-- Colored output on the console -->
+    <Console name="STDOUT">
+        <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable}{INFO=normal, DEBUG=normal, TRACE=normal}%n"/>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+
+    <!-- You can set different levels for categories here -->
+    <!-- You can also assign different appenders for each category, but you don't have to -->
+    <Logger name="com.arjuna" level="WARN"/>
+    <Logger name="org.jboss.threads" level="WARN"/>
+
+    <Logger name="org.infinispan.cache.impl.CacheImpl" level="TRACE"/>
+
+  </Loggers>
+</Configuration>

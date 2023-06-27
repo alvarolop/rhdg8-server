@@ -1,0 +1,46 @@
+version: '3'
+services:
+
+# TO DO: Add extension fields: https://docs.docker.com/compose/compose-file/compose-file-v3/#extension-fields
+
+  eu-01:
+    image: quay.io/infinispan/server:14.0
+    privileged: true
+    volumes:
+      - ./conf/infinispan-europe.yaml:/opt/infinispan/server/conf/infinispan.yaml:Z
+      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml
+    environment:
+      USER: admin
+      PASS: password
+      ISPN_HOME: /opt/infinispan
+      JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-01"
+    ports:
+      - 11222:11222
+      - 11223:11223
+    networks:
+      - infinispan
+    command:
+      - "-c infinispan.yaml"
+
+  eu-02:
+    image: quay.io/infinispan/server:14.0
+    privileged: true
+    volumes:
+      - ./conf/infinispan-europe.yaml:/opt/infinispan/server/conf/infinispan.yaml:Z
+      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml
+    environment:
+      USER: admin
+      PASS: password
+      ISPN_HOME: /opt/infinispan
+      JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-02"
+    ports:
+      - 11322:11222
+      - 11323:11223
+    networks:
+      - infinispan
+    command:
+      - "-c infinispan.yaml"
+
+networks:
+  infinispan:
+    driver: bridge

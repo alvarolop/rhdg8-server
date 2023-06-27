@@ -27,7 +27,7 @@ endif::[]
 :rhel-downloaded-filename: redhat-datagrid-8.4.0-server
 :rhel-server-path: redhat-datagrid-8.4.0-server
 
-This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster on OCP and RHEL. 
+This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster locally and on OCP. 
 
 // Create the Table of contents here
 toc::[]
@@ -36,146 +36,46 @@ toc::[]
 
 Red Hat Data Grid is an in-memory, distributed, NoSQL datastore solution. Your applications can access, process, and analyze data at in-memory speed to deliver a superior user experience. 
 
-Red Hat Data Grid provides value as a standard architectural component in application infrastructures for a variety of real-world scenarios and use-cases:
+Red Hat Data Grid provides value as a standard architectural component in application infrastructures for a variety of real-world scenarios and usecases:
 
 * Data caching and transient data storage.
 * Primary data store.
 * Low latency compute grid.
 
 
-=== Features and benefits
-
-To support modern data management requirements with rapid data processing, elastic scalability, and high availability, Red Hat Data Grid offers: 
-
-* *NoSQL data store*. Provides simple, flexible storage for a variety of data without the constraints of a fixed data model.
-* *Apache Spark and Hadoop integration*. Offers full support as an in-memory data store for Apache Spark and Hadoop, with support for Spark resilient distributed datasets (RDDs) and Discretized Streams (Dstreams), as well as Hadoop I/O format.
-* *Rich querying*. Provides easy search for objects using values and ranges, without the need for key-based lookups or an object’s exact location. 
-* *Polyglot client and access protocol support*. Offers read/write capabilities that let applications written in multiple programming languages easily access and share data. Applications can access the data grid remotely, using REST, or Hot Rod—for Java™, C++, and .NET.
-* *Distributed parallel execution*. Quickly process large volumes of data and support long-running compute applications using simplified Map-Reduce parallel operations.
-
-* *Flexible persistence*. Increase the lifespan of information in the memory for improved durability through support for both shared nothing and shared database—RDBMS or NoSQL—architectures.
-
-* *Comprehensive security*. Authentication, role-based authorization, and access control are integrated with existing security and identity structures to give only trusted users, services, and applications access to the data grid.
-
-* *Cross-datacenter replication*. Replicate applications across data centers and achieve high availability to meet service-level agreement (SLA) requirements for data within and across data centers.
-
-* *Rolling upgrades*. Upgrade your cluster without downtime for continuous, uninterrupted operations for remote users and applications.
 
 
-=== RHDG Operator
+== Deploying standalone
 
-The Data Grid Operator provides operational intelligence and reduces management complexity for deploying Data Grid on OpenShift, automatically upgrading clusters when new image versions become available.
-
-In order to upgrade Data Grid clusters, the operator checks the version of the image of each Data Grid node. If the operator determines that a new version of the image is available, it gracefully shuts down all nodes, applies the new image, and restarts the nodes.
-
-On OpenShift, the Operator Lifecycle Manager (OLM) enables upgrades for Data Grid Operator. 
+Currently, Data Grid is supported both using the binary on VMs and using the container images on Openshift. Due to the huge benefits of deploying our applications containerized in Openshift, we will use the same image to launch the Data Grid cluster locally using `podman-compose`:
 
 
-
-
-
-
-== Deploying RHDG on RHEL
-
-This section explains how to configure, run, and monitor Data Grid servers. The binaries are available on the RH https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=data.grid&downloadType=distributions[downloads website]. 
-
-
-
-=== Running RHDG locally in standalone mode
-
-This is the basic installation option, valid for basic exploration and development purposes. Follow these steps to run the server in this mode:
-
-.Unzip the server
-[source, bash, subs="attributes"]
+.Launch the Data Grid cluster with only one replica
+[source, bash]
 ----
-cd ~/Downloads 
-unzip {rhel-downloaded-filename}.zip
+podman-compose -f local/docker-compose-1.yaml up
 ----
 
-// .Install the server patch
-// [source, bash]
-// ----
-// ./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
-// ----
+.Launch the Data Grid cluster with two replicas
+[source, bash]
+----
+podman-compose -f local/docker-compose-2.yaml up
+----
 
-.Create the developer user
-[source, bash, subs="attributes"]
-----
-./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin
-----
+If the cluster formation goes well, you will see that the JGroups Cluster View is updated to the two servers:
 
 .Launch the server
 [source, bash, subs="attributes"]
 ----
-./{rhel-server-path}/bin/server.sh 
-2022-02-14 18:36:43,541 INFO  (main) [BOOT] JVM OpenJDK 64-Bit Server VM Red Hat, Inc. 11.0.14+9
-[...]
-2022-02-14 18:36:48,086 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SinglePort (default) listening on 127.0.0.1:11222
-2022-02-14 18:36:48,087 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'hat2-29797' listening on http://127.0.0.1:11222
-2022-02-14 18:36:48,126 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.4.0.GA started in 4526ms
+[eu-01] | 2023-06-27 07:48:06,213 INFO  (non-blocking-thread-infinispan-europe-01-p2-t1) [org.infinispan.LIFECYCLE] [Context=___hotRodTopologyCache_hotrod-default][Scope=infinispan-europe-01]ISPN100010: Finished rebalance with members [infinispan-europe-02, infinispan-europe-01], topology id 7
+[eu-02] | 2023-06-27 07:48:06,224 INFO  (jgroups-5,infinispan-europe-02) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100009: Advancing to rebalance phase READ_ALL_WRITE_ALL, topology id 8
+[eu-02] | 2023-06-27 07:48:06,227 INFO  (jgroups-6,infinispan-europe-02) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100009: Advancing to rebalance phase READ_NEW_WRITE_ALL, topology id 9
+[eu-02] | 2023-06-27 07:48:06,230 INFO  (jgroups-5,infinispan-europe-02) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100010: Finished rebalance with members [infinispan-europe-02, infinispan-europe-01], topology id 10
+//... 
+[eu-01] | 2023-06-27 07:48:06,401 INFO  (main) [org.infinispan.SERVER] ISPN080001: Infinispan Server 14.0.1.Final started in 2777ms
 ----
 
-
-=== Running RHDG locally in clustering mode
-
-Unzip the server as in the previous example, locate the folder named `server`, duplicate it and then use one with each server instance. 
-
-.Unzip the server
-[source, bash, subs="attributes"]
-----
-cd ~/Downloads
-unzip {rhel-downloaded-filename}.zip
-----
-
-// .Install the server patch
-// [source, bash]
-// ----
-// ./{rhel-server-path}/bin/cli.sh patch install {rhel-downloaded-filename}.zip
-// ----
-
-.Duplicate the server config
-[source, bash, subs="attributes"]
-----
-cp -r {rhel-server-path}/server {rhel-server-path}/server-01
-cp -r {rhel-server-path}/server {rhel-server-path}/server-02
-----
-
-
-.Create the developer user in both instances
-[source, bash, subs="attributes"]
-----
-./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin --server-root=server-01
-./{rhel-server-path}/bin/cli.sh user create developer -p developer -g admin --server-root=server-02
-----
-
-
-.Launch both server instances
-[source, bash, subs="attributes"]
-----
-./{rhel-server-path}/bin/server.sh --node-name=node-01 --server-root={rhel-server-path}/server-01 --port-offset=0
-./{rhel-server-path}/bin/server.sh --node-name=node-02 --server-root={rhel-server-path}/server-02 --port-offset=100
-----
-
-After running both commands, you will see in both terminals similar logs to the ones shown below:
-[source, bash, subs="attributes"]
-----
-[...]
-2022-02-14 18:38:04,606 INFO  (main) [org.infinispan.SERVER] ISPN080034: Server 'node-01' listening on http://127.0.0.1:11222
-2022-02-14 18:38:04,720 INFO  (main) [org.infinispan.SERVER] ISPN080001: Red Hat Data Grid Server 8.4.0.GA started in 5521ms
-2022-02-14 18:38:12,903 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN000094: Received new cluster view for channel cluster: [node-01|1] (2) [node-01, node-02]
-2022-02-14 18:38:12,912 INFO  (jgroups-6,node-01) [org.infinispan.CLUSTER] ISPN100000: Node node-02 joined the cluster
-2022-02-14 18:38:13,621 INFO  (jgroups-12,node-01) [org.infinispan.CLUSTER] [Context=org.infinispan.CLIENT_SERVER_TX_TABLE]ISPN100002: Starting rebalance with members [node-01, node-02], phase READ_OLD_WRITE_ALL, topology id 2
-[...]
-2022-02-14 18:38:14,457 INFO  (jgroups-14,node-01) [org.infinispan.CLUSTER] [Context=___hotRodTopologyCache_hotrod-default]ISPN100010: Finished rebalance with members [node-01, node-02], topology id 5
-----
-
-
-
-
-
-
-
-
+NOTE: For ways of deploying the server using the .zip, check the https://github.com/alvarolop/rhdg8-server/tree/rhdg84-rhel[following version of this repository].
 
 
 
