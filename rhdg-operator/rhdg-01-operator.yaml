@@ -9,6 +9,7 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
     openshift.io/support-url: https://access.redhat.com
 objects:
+
 - apiVersion: project.openshift.io/v1
   kind: Project
   metadata:
@@ -16,6 +17,7 @@ objects:
     annotations:
       openshift.io/description: "This project contains all the resources related to the operator of Red Hat Data Grid 8"
       openshift.io/display-name: "RH Data Grid 8 - Operator"
+
 - apiVersion: project.openshift.io/v1
   kind: Project
   metadata:
@@ -23,14 +25,16 @@ objects:
     annotations:
       openshift.io/description: "This project contains all the clusters deployed of Red Hat Data Grid 8"
       openshift.io/display-name: "RH Data Grid 8"
+
 - apiVersion: operators.coreos.com/v1
   kind: OperatorGroup
   metadata:
     name: datagrid
     namespace: ${OPERATOR_NAMESPACE}
-  spec:
-    targetNamespaces:
-      - ${CLUSTER_NAMESPACE}
+  spec: {}
+    # targetNamespaces:
+      # - ${CLUSTER_NAMESPACE}
+
 - apiVersion: operators.coreos.com/v1alpha1
   kind: Subscription
   metadata:
@@ -42,6 +46,7 @@ objects:
     name: datagrid
     source: redhat-operators
     sourceNamespace: openshift-marketplace
+
 parameters:
 - name: OPERATOR_NAMESPACE
   description: "The project where the operator will be installed."
