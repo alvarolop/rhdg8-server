@@ -53,13 +53,13 @@ Currently, Data Grid is supported both using the binary on VMs and using the con
 .Launch the Data Grid cluster with only one replica
 [source, bash]
 ----
-podman-compose -f local/docker-compose-1.yaml up
+podman-compose -f rhdg-local/docker-compose-1.yaml up
 ----
 
 .Launch the Data Grid cluster with two replicas
 [source, bash]
 ----
-podman-compose -f local/docker-compose-2.yaml up
+podman-compose -f rhdg-local/docker-compose-2.yaml up
 ----
 
 If the cluster formation goes well, you will see that the JGroups Cluster View is updated to the two servers:
@@ -79,9 +79,9 @@ NOTE: For ways of deploying the server using the .zip, check the https://github.
 
 
 
-== Deploying RHDG on OCP using the Operator
 
-An Operator is a method of packaging, deploying and managing a Kubernetes-native application. A Kubernetes-native application is an application that is both deployed on Kubernetes and managed using the Kubernetes APIs and `kubectl` tooling.
+
+== Deploying RHDG on OCP using the Operator
 
 Install Data Grid Operator into an OpenShift namespace to create and manage Data Grid clusters.
 
@@ -89,38 +89,19 @@ Install Data Grid Operator into an OpenShift namespace to create and manage Data
 
 Create subscriptions to Data Grid Operator on OpenShift so you can install different Data Grid versions and receive automatic updates.
 
-To deploy the RHDG operator, you will need to create three different objects:
+To deploy the RHDG operator, you will need to create four objects: The namespace of the Operator, the namespace where the Data Grid cluster will live, the Subscription and the Operator Group.
 
-* Two *Openshift projects* that will contain the operator and the objects of the RHDG cluster.
-
-* An *OperatorGroup*, which provides multi-tenancy configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators. As we are not deploying our operator in the default namespace (`openshift-operators`), we will need to create one to set the namespaces where the Data Grid operator will be able to create and monitor clusters.
-
-NOTE: The *OperatorGroup* resource allows to configure https://docs.openshift.com/container-platform/4.11/operators/understanding/olm/olm-understanding-operatorgroups.html#olm-operatorgroups-membership_olm-understanding-operatorgroups[four possible namespace-scopes] for the operator. Please check <<annex-configure-the-scope-of-your-operator>> before executing the commands of this section.
-
-* A *Subscription*, which represents an intention to install an Operator. It is the custom resource that relates an Operator to a CatalogSource. Subscriptions describe which channel of an Operator package to subscribe to, and whether to perform updates automatically or manually. 
-
-I have created an OCP template to quickly deploy this operator. Just execute the following command to have it up and running on your cluster. 
 
 IMPORTANT: Bear in mind that you will need `cluster-admin` permissions to deploy an operator, as it is necessary to create cluster-wide CRDs (Custom Resource Definitions).
 
-[source, bash]
-----
-oc process -f rhdg-operator/rhdg-01-operator.yaml | oc apply -f -
-----
-
-This template provides two parameters to modify the project where the operator and the cluster are installed. It is possible to deploy both on the same project or in different projects. By default, values are: 
-
-* *OPERATOR_NAMESPACE* = `rhdg8-operator`
-* *CLUSTER_NAMESPACE* = `rhdg8`
-
-Modify them just by passing arguments to the template:
+Execute the following command to deploy the operator: 
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="other-namespace" -p CLUSTER_NAMESPACE="another-namespace" | oc apply -f -
+oc process -f rhdg-operator/rhdg-01-operator.yaml -p OPERATOR_NAMESPACE="rhdg8-operator" -p CLUSTER_NAMESPACE="rhdg8" | oc apply -f -
 ----
 
-It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/fd77665b-d6df-4e25-a9cd-45fbed6dd6c1[documentation].
+It is also possible to install the operator from the web console. For more information, please check the official https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.4/html/data_grid_operator_guide/installation[documentation].
 
 
 === Deploying an RHDG cluster
@@ -525,25 +506,6 @@ The previous command will show all the logs from all the pods from a namespace t
 
 
 
-== Annex: Deploying the Infinispan operator
-
-The same configuration rules from the previous chapter apply.
-
-[source, bash, linenums]
-----
-oc process -f rhdg-operator/infinispan-01-operator.yaml -p OPERATOR_NAMESPACE="infinispan-operator" -p CLUSTER_NAMESPACE="infinispan" | oc apply -f -
-----
-
-[source, bash, linenums]
-----
-oc process -f rhdg-operator/rhdg-02-cluster-basic.yaml -p CLUSTER_NAMESPACE="infinispan" -p CLUSTER_NAME="rhdg" | oc apply -f -
-----
-
-
-It is also possible to install the operator from the web console. For more information, please check the official https://infinispan.org/docs/infinispan-operator/main/operator.html#installation[documentation].
-
-
-
 
 
 
@@ -648,6 +610,7 @@ replicatedCache:
 == Annex: Getting full CR example
 
 1. Download the Infinispan CRD:
++
 [source, bash]
 ----
 # Infinispan Operator 2.1.X
@@ -662,13 +625,14 @@ curl -o rhdg-crds/infinispan-2.2.x.yaml $URL
 2. Edit the file in order to create a new CRD instead of modifying the previous one.
 +
 3. Create the object in the cluster:
-+,
++
 [source, bash]
 ----
 oc apply -f rhdg-crds/infinispan-2.2.x.yaml
 ----
 +
 4. Get the full list of options:
++
 [source, bash]
 ----
 oc explain custominfinispan --recursive
