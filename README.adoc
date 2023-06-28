@@ -143,11 +143,11 @@ Execute the following commands depending on the cluster that you want to deploy:
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-02-cluster-basic.yaml -p CLUSTER_NAME="cluster-01" | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster-basic.yaml -p CLUSTER_NAME="cluster-a" | oc apply -f -
 
-oc process -f rhdg-operator/rhdg-02-cluster-auth.yaml -p CLUSTER_NAME="cluster-02" | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster-auth.yaml -p CLUSTER_NAME="cluster-b" | oc apply -f -
 
-oc process -f rhdg-operator/rhdg-02-cluster-auth-ssl.yaml -p CLUSTER_NAME="cluster-03" | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster-auth-ssl.yaml -p CLUSTER_NAME="cluster-c" | oc apply -f -
 ----
 
 
