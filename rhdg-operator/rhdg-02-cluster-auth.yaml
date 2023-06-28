@@ -105,13 +105,13 @@ objects:
       # nodePort:
       # port: 80
       type: Route
-    # image: "infinispan/server:12.0"
+    # image: "infinispan/server:14.0"
     logging:
       categories: {}
       # categories:
       #   org.infinispan: debug
       #   org.jgroups: debug
-    replicas: 1
+    replicas: ${{REPLICAS}}
     security:
       authorization:
         enabled: true
@@ -182,8 +182,6 @@ objects:
         cache-container:
           name: "default"
           statistics: "true"
-          transport:
-            stack: "tcp"
           distributedCacheConfiguration:
             name: "proto-dist-template"
             mode: "SYNC"
@@ -228,3 +226,7 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "rhdg"
+- name: REPLICAS
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "2"
