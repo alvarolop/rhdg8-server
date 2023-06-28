@@ -18,14 +18,18 @@ ifdef::env-github[]
 :important-caption: :heavy_exclamation_mark:
 :caution-caption: :fire:
 :warning-caption: :warning:
+// Icons for GitHub
+:yes: :heavy_check_mark:
+:no: :x:
 endif::[]
 ifndef::env-github[]
 :icons: font
+// Icons not for GitHub
+:yes: icon:check[]
+:no: icon:times[]
 endif::[]
 // End: Enable admonition icons
-// Refs
-:rhel-downloaded-filename: redhat-datagrid-8.4.0-server
-:rhel-server-path: redhat-datagrid-8.4.0-server
+
 
 This repository demonstrates some of the basic features of Red Hat's latest Data Grid release and how to deploy a Data Grid cluster locally and on OCP. 
 
@@ -87,8 +91,6 @@ Install Data Grid Operator into an OpenShift namespace to create and manage Data
 
 === Deploying the RHDG operator
 
-Create subscriptions to Data Grid Operator on OpenShift so you can install different Data Grid versions and receive automatic updates.
-
 To deploy the RHDG operator, you will need to create four objects: The namespace of the Operator, the namespace where the Data Grid cluster will live, the Subscription and the Operator Group.
 
 
@@ -106,31 +108,48 @@ It is also possible to install the operator from the web console. For more infor
 
 === Deploying an RHDG cluster
 
-Data Grid Operator lets you create, configure, and manage Data Grid clusters. Data Grid Operator adds a new Custom Resource (CR) of type Infinispan that lets you handle Data Grid clusters as complex units on OpenShift.
-
-Data Grid Operator watches for Infinispan Custom Resources (CR) that you use to instantiate and configure Data Grid clusters and manage OpenShift resources, such as StatefulSets and Services. In this way, the Infinispan CR is your primary interface to Data Grid on OpenShift.
+The Data Grid operator defines the *Infinispan* CRD to simplify the process of creation, configuration, and management of DG clusters.
 
 
-I have created an OCP template to quickly deploy a basic RHDG cluster with 3 replicas. Execute the following command and have it up and running on your cluster. 
+I have created several OCP templates to quickly deploy different set-ups of Data Grid:
+
+[cols="4*",options="header",width=100%]
+|===
+|Template
+|Authentication
+|Authorization
+|SSL Encryption
+
+| link:rhdg-operator/rhdg-02-cluster-basic.yaml[Basic]
+|{no}
+|{no}
+|{no}
+
+| link:rhdg-operator/rhdg-02-cluster-auth.yaml[Auth]
+|{yes}
+|{yes}
+|{no}
+
+| link:rhdg-operator/rhdg-02-cluster-auth-ssl.yaml[SSL Encryption]
+|{yes}
+|{yes}
+|{yes}
+
+|===
+
+
+Execute the following commands depending on the cluster that you want to deploy: 
 
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-02-cluster.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-02-cluster-basic.yaml -p CLUSTER_NAME="cluster-01" | oc apply -f -
+
+oc process -f rhdg-operator/rhdg-02-cluster-auth.yaml -p CLUSTER_NAME="cluster-02" | oc apply -f -
+
+oc process -f rhdg-operator/rhdg-02-cluster-auth-ssl.yaml -p CLUSTER_NAME="cluster-03" | oc apply -f -
 ----
 
-This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
-
-* *CLUSTER_NAMESPACE* = `rhdg8`.
-* *CLUSTER_NAME* = `rhdg`.
-
-
-Modify them just by passing arguments to the template:
-
-[source, bash]
-----
-oc process -f rhdg-operator/rhdg-02-cluster.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
-----
 
 
 === Creating RHDG caches using the Operator CRD
