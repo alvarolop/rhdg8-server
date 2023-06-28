@@ -229,6 +229,51 @@ oc process -f rhdg-operator/rhdg-05-alerting-rules.yaml -p CLUSTER_NAMESPACE="rh
 
 
 
+== Creating a Cross-site replication cluster
+
+.Create Cluster A
+[source, bash]
+----
+oc process -f rhdg-operator/rhdg-02-cluster-cross-site.yaml \
+  -p CLUSTER_NAMESPACE="rhdg8-a" \
+  -p CLUSTER_NAME="cluster-a" \
+  -p CROSS_SITE_NAMESPACE="rhdg8-b" \
+  -p CROSS_SITE_CLUSTER="cluster-b" | oc apply -f -
+----
+
+.Create Cluster B
+[source, bash]
+----
+oc process -f rhdg-operator/rhdg-02-cluster-cross-site.yaml \
+  -p CLUSTER_NAMESPACE="rhdg8-b" \
+  -p CLUSTER_NAME="cluster-b" \
+  -p CROSS_SITE_NAMESPACE="rhdg8-a" \
+  -p CROSS_SITE_CLUSTER="cluster-a" | oc apply -f -
+----
+
+.Test the configuration
+[source, bash]
+----
+CLUSTER_A_URL=$(oc get route cluster-a-external -n rhdg8-a -o template='http://{{.spec.host}}')
+CLUSTER_B_URL=$(oc get route cluster-b-external -n rhdg8-b -o template='http://{{.spec.host}}')
+
+# Check the configuration of the cache in each environment (It points to the other environment)
+curl -H "Content-Type: application/json" ${CLUSTER_A_URL}/rest/v2/caches/cross-site-cache?action=config | jq .
+
+# Add an entry in clusterA
+curl -X POST ${CLUSTER_A_URL}/rest/v2/caches/cross-site-cache/hello \
+  -H "Key-Content-Type: text/plain" \
+  -H "Content-Type: text/plain" \
+  -d 'world'
+
+// curl -X POST ${CLUSTER_A_URL}/rest/v2/caches/cross-site-cache/hello \
+//   -H "Key-Content-Type: text/plain" \
+//   -H "Content-Type: application/x-protostream" \
+//   -d '{"_type": "string", "_value": "world"}'
+
+# Retrieve keys from clusterB
+curl ${CLUSTER_A_URL}/rest/v2/caches/cross-site-cache?action=keys
+----
 
 
 == Deploying RHDG on OCP using Helm Charts
