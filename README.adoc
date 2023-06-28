@@ -154,14 +154,9 @@ oc process -f rhdg-operator/rhdg-02-cluster-auth-ssl.yaml -p CLUSTER_NAME="clust
 
 === Creating RHDG caches using the Operator CRD
 
-Data Grid stores entries into caches, which can be created using several methods: REST, CLI, programmatically using the Java Client or using the `Cache` CRD. In this section, we will explore how to create caches using the Operator.
+NOTE: In this section, we will explore how to create caches using the Operator. For other ways of creating caches, please check this other https://github.com/alvarolop/rhdg8-client#cache-configuration[Git repository] with information about the Data Grid client.
 
-
-NOTE: For other ways of creating caches, please check this other https://github.com/alvarolop/rhdg8-client#cache-configuration[Git repository] with information about the Data Grid client.
-
-To create caches with Data Grid Operator, you use Cache CRs to add caches from templates or XML configuration. Bear in mind that you can only create a single cache for each `Cache` CR.
-
-I have created an OCP template to quickly set up two caches on the RHDG cluster:
+I have created an OCP template to quickly set up several caches on the RHDG cluster:
 
 * `operator-cache-01`: Based on an XML configuration.
 * `operator-cache-02`: Based on a YAML configuration.
@@ -169,64 +164,35 @@ I have created an OCP template to quickly set up two caches on the RHDG cluster:
 
 
 In order to apply this template, just execute the following command:
-[source, bash]
-----
-oc process -f rhdg-operator/rhdg-03-caches.yaml | oc apply -f -
-----
-
-This template provides two parameters to modify the project where the cluster is installed and the name of the cluster to deploy. The cluster namespace should be the same as in the previous step. By default, values are: 
-
-* *CLUSTER_NAMESPACE* = `rhdg8`.
-* *CLUSTER_NAME* = `rhdg`.
-
-
-Modify them just by passing arguments to the template:
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
-----
-
-Interact with the newly created caches with the following commands:
-[source, bash]
-----
-# Set your variables. These are default:
-CLUSTER_NAMESPACE="rhdg8"
-CLUSTER_NAME="rhdg"
-RHDG_URL=$(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')
-
-# Check all the caches on your cluster
-curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches | jq
-
-# Check information about an specific cache
-curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches/${CACHE_NAME} | jq
-
-# Delete a cache
-curl -X DELETE -k -u developer:developer ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}
+oc process -f rhdg-operator/rhdg-03-caches.yaml -p CLUSTER_NAMESPACE="rhdg8" -p CLUSTER_NAME="rhdg" | oc apply -f -
 ----
 
 
-For more information about how to create caches using the CRD, please check the https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/e1fe5fa9-8bf4-4e0e-b6c1-ebef73539436[official documentation].
+For more information about how to create caches using the CRD, please check the https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.4/html/data_grid_operator_guide/creating-caches[official documentation].
+
+
+
 
 
 === Monitoring RHDG with Prometheus
 
-Data Grid exposes a metrics endpoint that provides statistics and events to Prometheus.
-
-After installing OpenShift Container Platform 4.6, cluster administrators can optionally enable monitoring for user-defined projects. By using this feature, cluster administrators, developers, and other users can specify how services and pods are monitored in their own projects. You can then query metrics, review dashboards, and manage alerting rules and silences for your own projects in the OpenShift Container Platform web console. We are going to take advantage of this feature.
+Data Grid exposes a metrics endpoint that provides statistics and events in Prometheus format.
 
 
 .Enabling monitoring for user-defined projects
 [WARNING]
 ==== 
-Monitoring of user-defined projects is not enabled by default. To enable it, you need to modify a ConfigMap of the `openshift-monitoring`. You need permission to create and modify ConfigMaps in this project. You only have to execute this command *once* per OCP cluster. [underline]#Please, do not execute it before checking if this was done before, you can override work from your colleagues#
+Do not execute it before checking if this was done before, you can override work from your colleagues:
 
 [source, bash]
 ----
 oc apply -f ocp/ocp-01-user-workload-monitoring.yaml
 ----
 
-After executing the command above, you will see some pods in the following namespace:
+After executing the command above, you will see several pods in the following namespace:
 [source, bash]
 ----
 oc get pods -n openshift-user-workload-monitoring
@@ -244,27 +210,21 @@ I have created an OCP template to quickly configure metrics monitoring of an RHD
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-04-monitoring.yaml | oc apply -f -
+oc process -f rhdg-operator/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="rhdg8" -p CLUSTER_NAME="rhdg" | oc apply -f -
 ----
 
-This template provides two parameters to modify the project where the cluster was installed and the name of the cluster itself. By default, values are: 
 
-* *CLUSTER_NAMESPACE* = `rhdg8`
-* *CLUSTER_NAME* = `rhdg`
+For more information, access the Openshift https://docs.openshift.com/container-platform/4.13/monitoring/enabling-monitoring-for-user-defined-projects.html[documentation] for the monitoring stack and the RHDG documentation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.4/html/data_grid_operator_guide/monitoring-services[configure monitoring] for RHDG 8 on OCP.
 
 
-Modify them just by passing arguments to the template:
+
+=== Alerting with PrometheusRules
+
 
 [source, bash]
 ----
-oc process -f rhdg-operator/rhdg-04-monitoring.yaml -p CLUSTER_NAMESPACE="another-namespace" -p CLUSTER_NAME="my-cluster" | oc apply -f -
+oc process -f rhdg-operator/rhdg-05-alerting-rules.yaml -p CLUSTER_NAMESPACE="rhdg8" | oc apply -f -
 ----
-
-For more information, access the Openshift https://docs.openshift.com/container-platform/4.9/monitoring/monitoring-overview.html[documentation] for the monitoring stack and the RHDG documentation to https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.3/guide/990f6af5-2a9c-4af1-afaf-d2ea562c5bf8[configure monitoring] for RHDG 8 on OCP.
-
-
-
-
 
 
 
@@ -273,7 +233,6 @@ For more information, access the Openshift https://docs.openshift.com/container-
 
 == Deploying RHDG on OCP using Helm Charts
 
-Helm is an application package manager for Kubernetes, which coordinates the download, installation, and deployment of apps. The original goal of Helm was to provide users with a better way to manage all the Kubernetes YAML files we create on Kubernetes projects using Helm Charts. A Chart is basically a set of templates and a file containing variables used to fill these templates. Let's have a look at an example.
 
 === Option 1: Using an official Infinispan Helm Chart release
 
@@ -311,9 +270,9 @@ helm upgrade rhdg openshift-helm-charts/redhat-data-grid -f rhdg-chart/default-v
 ----
 
 
-If you want to customize the server deployment (The `infinispan.yaml` file), you will need to provide server configuration in YAML format. You can use the following examples:
+If you want to customize the server deployment - the `infinispan.yaml` file -, you will need to provide server configuration in YAML format. You can use the following examples:
 
-* `rhdg-chart/default-values.yaml`: Example provided in the https://github.com/infinispan/infinispan-helm-charts/blob/0.2.0/values.yaml[Helm Charts GitHub repository].
+* `rhdg-chart/default-values.yaml`: Example provided in the https://github.com/infinispan/infinispan-helm-charts/blob/0.3.1/values.yaml[Helm Charts GitHub repository].
 * `extras/config/server-example-infinispan.yaml`: Example provided as a testing file for the server in the https://github.com/infinispan/infinispan/blob/13.0.2.Final/server/runtime/src/test/resources/configuration/ServerConfigurationParserTest.yaml[Infinispan GitHub repository]. 
 * `extras/config/default-operator-infinispan.yaml`: Example obtained from the RHDG image for Infinispan 13.0.2.Final.
 * https://infinispan.org/docs/infinispan-operator/main/operator.html#infinispan-configuration_configuring-clusters[Upstream documentation] with examples.
@@ -326,31 +285,33 @@ If you want to customize the server deployment (The `infinispan.yaml` file), you
 
 === Option 2: Customizing the official Helm Chart
 
-To customize the Helm Chart, you will need to fork the official upstream chart adn modify the configuration needed. In my case, I have forked it https://github.com/alvarolop/infinispan-helm-charts[here], in order to change several aspects of the configuration.
+To customize the Helm Chart, you will need to fork the official upstream chart and modify the configuration needed:
 
 
-
-1. Clone your own git repo in the parent folder:
+1. Clone your git repo in the parent folder:
++
 [source, bash]
 ----
-cd ..
 git clone https://github.com/alvarolop/infinispan-helm-charts.git
 cd infinispan-helm-charts
 ----
 +
 2. Create a new OCP project:
++
 [source, bash]
 ----
 oc new-project rhdg8-helm-customized --display-name="RHDG 8 - Helm Customized" --description="This namespace contains a deployment of RHDG using a customized Helm Chart"
 ----
 +
 3. In order to deploy this unpackaged version of the Helm Chart, you just have to use Helm to render the OCP objects using the default values file and apply the result in your OCP cluster:
++
 [source, bash]
 ----
 helm template --validate --set deploy.nameOverride="infinispan" . | oc apply -f -
 ----
 
 Alternatively, you can use the `values.yaml` files defined in this repository: 
+
 [source, bash]
 ----
 helm template --validate --set deploy.nameOverride="infinispan" -f ../rhdg8-server/rhdg-chart/default-values.yaml . | oc apply -f -
@@ -359,7 +320,7 @@ helm template --validate --set deploy.nameOverride="infinispan" -f ../rhdg8-serv
 [NOTE]
 ====
 In the previous commands, you need the following parameters:
-* `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` does validate by default, that is why this param is only necessary in this section).
+* `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` does validate by default, that is why this param is only necessary for this section).
 * `--set deploy.nameOverride="infinispan"`: By default, the packaged Helm Chart uses the name of the package `infinispan`. As this is not the packaged version, the name defaults to RELEASE-NAME which is not a lowercase RFC 1123 subdomain. 
 ====
 
@@ -385,11 +346,9 @@ For more information, check the following links:
 
 == Monitoring RHDG with Grafana
 
-A typical OpenShift monitoring stack includes Prometheus for monitoring both systems and services, and Grafana for analyzing and visualizing metrics.
+A typical OpenShift monitoring stack includes Prometheus - for monitoring both systems and services-, and Grafana - for analyzing and visualizing metrics-.
 
-Administrators are often looking to write custom queries and create custom dashboards in Grafana. However, Grafana instances provided with the monitoring stack (and its dashboards) are read-only.  To solve this problem, we can use the community-powered Grafana operator provided by OperatorHub.
-
-To deploy the community-powered Grafana operator on OCP 4.9 just follow these steps:
+To deploy the community-powered Grafana operator on OCP 4.13 just follow these steps:
 
 === Deploy the Grafana operator
 [source, bash]
@@ -408,10 +367,10 @@ oc process -f grafana/grafana-02-instance.yaml | oc apply -f -
 Now, we will create a Grafana data source:
 [source, bash]
 ----
-PROJECT=grafana
+GRAFANA_NAMESPACE=grafana
 
-oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount -n ${PROJECT}
-BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n ${PROJECT})
+oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount -n ${GRAFANA_NAMESPACE}
+BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-serviceaccount -n $GRAFANA_NAMESPACE | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
 oc process -f grafana/grafana-03-datasource.yaml -p BEARER_TOKEN=${BEARER_TOKEN} | oc apply -f -
 ----
 
@@ -421,7 +380,7 @@ Now, we will create a Grafana dashboard:
 ----
 DASHBOARD_NAME="grafana-dashboard-rhdg8"
 # Create a configMap containing the Dashboard
-oc create configmap $DASHBOARD_NAME --from-file=dashboard=grafana/$DASHBOARD_NAME.json -n $PROJECT
+oc create configmap $DASHBOARD_NAME --from-file=dashboard=grafana/$DASHBOARD_NAME.json -n $GRAFANA_NAMESPACE
 # Create a Dashboard object that automatically updates Grafana
 oc process -f grafana/grafana-04-dashboard.yaml -p DASHBOARD_NAME=$DASHBOARD_NAME | oc apply -f -
 ----
@@ -434,29 +393,47 @@ NOTE: https://github.com/grafana-operator/grafana-operator/blob/master/deploy/ex
 After accessing Grafana using the OCP SSO, you may log in as `admin`. Retrieve the credentials from the secret using the following commands:
 [source, bash]
 ----
-oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode
-oc get secret grafana-admin-credentials -n $PROJECT -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' | base64 --decode
+oc get secret grafana-admin-credentials -n $GRAFANA_NAMESPACE -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode
+oc get secret grafana-admin-credentials -n $GRAFANA_NAMESPACE -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' | base64 --decode
 ----
 
 
 
-For more information, access the Grafana https://grafana.com/docs/grafana/latest/[main documentation] or the Grafana https://github.com/integr8ly/grafana-operator/blob/v3.6.0/README.md[operator documentation].
+For more information, access the Grafana https://grafana.com/docs/grafana/latest/[main documentation] or the Grafana https://github.com/grafana-operator/grafana-operator/blob/v4.10.1/README.md[operator documentation].
 
 
 
 
-== Alerting with PrometheusRules
 
-
-[source, bash]
-----
-oc process -f rhdg-operator/rhdg-05-alerting-rules.yaml | oc apply -f -
-----
 
 
 
 
 :sectnums!:
+
+
+
+
+== Annex: Interact with caches using REST
+
+
+Interact with the newly created caches with the following commands:
+[source, bash]
+----
+# Set your variables. These are default:
+CLUSTER_NAMESPACE="rhdg8"
+CLUSTER_NAME="rhdg"
+RHDG_URL=$(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')
+
+# Check all the caches on your cluster
+curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches | jq
+
+# Check information about an specific cache
+curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches/${CACHE_NAME} | jq
+
+# Delete a cache
+curl -X DELETE -k -u developer:developer ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}
+----
 
 
 == Annex: Configure the scope of your operator
