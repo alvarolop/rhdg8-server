@@ -320,6 +320,7 @@ helm template --validate --set deploy.nameOverride="infinispan" -f ../rhdg8-serv
 [NOTE]
 ====
 In the previous commands, you need the following parameters:
+
 * `--validate`: By default, `helm template` does not validate your manifests against the Kubernetes cluster you are currently pointing at. You need to force it. (`Helm install` does validate by default, that is why this param is only necessary for this section).
 * `--set deploy.nameOverride="infinispan"`: By default, the packaged Helm Chart uses the name of the package `infinispan`. As this is not the packaged version, the name defaults to RELEASE-NAME which is not a lowercase RFC 1123 subdomain. 
 ====
