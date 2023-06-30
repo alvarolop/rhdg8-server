@@ -57,13 +57,13 @@ Currently, Data Grid is supported both using the binary on VMs and using the con
 .Launch the Data Grid cluster with only one replica
 [source, bash]
 ----
-podman-compose -f rhdg-local/docker-compose-1.yaml up
+podman-compose -f rhdg-local/docker-compose.yaml up eu-01
 ----
 
 .Launch the Data Grid cluster with two replicas
 [source, bash]
 ----
-podman-compose -f rhdg-local/docker-compose-2.yaml up
+podman-compose -f rhdg-local/docker-compose.yaml up
 ----
 
 If the cluster formation goes well, you will see that the JGroups Cluster View is updated to the two servers:
