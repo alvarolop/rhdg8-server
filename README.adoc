@@ -467,13 +467,13 @@ CLUSTER_NAME="rhdg"
 RHDG_URL=$(oc get route ${CLUSTER_NAME}-external -n ${CLUSTER_NAMESPACE} -o template='https://{{.spec.host}}')
 
 # Check all the caches on your cluster
-curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches | jq
+curl -X GET -k -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches | jq
 
 # Check information about an specific cache
-curl -X GET -k -u developer:developer -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches/${CACHE_NAME} | jq
+curl -X GET -k -H "Content-Type: application/json" ${RHDG_URL}/rest/v2/caches/${CACHE_NAME} | jq
 
 # Delete a cache
-curl -X DELETE -k -u developer:developer ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}
+curl -X DELETE -k ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}
 ----
 
 
