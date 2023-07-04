@@ -4,11 +4,13 @@ services:
 # TO DO: Add extension fields: https://docs.docker.com/compose/compose-file/compose-file-v3/#extension-fields
 
   eu-01:
-    image: quay.io/infinispan/server:15.0
+    image: quay.io/infinispan/server:14.0
     privileged: true
+    # user: root
+    network_mode: host
     volumes:
       - ./conf/infinispan-europe.yaml:/opt/infinispan/server/conf/infinispan-europe.yaml:Z
-      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml
+      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml:Z
     environment:
       USER: admin
       PASS: password
@@ -16,33 +18,33 @@ services:
       JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-01"
     ports:
       - 11222:11222
-      - 11223:11223
-    networks:
-      - infinispan
+    # networks:
+    #   - infinispan
     command:
       - "-c infinispan.xml"
       - "-c infinispan-europe.yaml"
 
   eu-02:
-    image: quay.io/infinispan/server:15.0
+    image: quay.io/infinispan/server:14.0
     privileged: true
+    # user: root
+    network_mode: host
     volumes:
       - ./conf/infinispan-europe.yaml:/opt/infinispan/server/conf/infinispan-europe.yaml:Z
-      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml
+      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml:Z
     environment:
       USER: admin
       PASS: password
       ISPN_HOME: /opt/infinispan
-      JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-02"
+      JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-02 -Dinfinispan.socket.binding.port-offset=100"
     ports:
-      - 11322:11222
-      - 11323:11223
-    networks:
-      - infinispan
+      - 11322:11322
+    # networks:
+    #   - infinispan
     command:
       - "-c infinispan.xml"
       - "-c infinispan-europe.yaml"
 
-networks:
-  infinispan:
-    driver: bridge
+# networks:
+#   infinispan:
+#     driver: bridge
