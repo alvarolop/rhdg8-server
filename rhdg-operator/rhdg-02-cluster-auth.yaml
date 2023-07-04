@@ -25,11 +25,11 @@ objects:
         roles:
           - application
       - username: admin
-        password: changeme
+        password: password
         roles:
           - admin
       - username: deployeruser
-        password: changeme
+        password: password
         roles:
           - deployer
 - apiVersion: infinispan.org/v1
