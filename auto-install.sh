@@ -9,7 +9,7 @@ RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD_NAME="grafana-dashboard-rhdg8"
 GRAFANA_DASHBOARD_KEY="dashboard.json"
-RHDG_AUTH_ENABLED=false
+RHDG_AUTH_ENABLED=true
 RHDG_SSL_ENABLED=false
 
 #############################
