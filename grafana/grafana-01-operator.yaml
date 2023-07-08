@@ -30,7 +30,7 @@ objects:
     name: grafana-operator
     namespace: ${OPERATOR_NAMESPACE}
   spec:
-    channel: v4
+    channel: alpha
     installPlanApproval: Automatic
     name: grafana-operator
     source: community-operators

@@ -7,7 +7,7 @@ RHDG_OPERATOR_NAMESPACE=rhdg8-operator
 RHDG_NAMESPACE=rhdg8
 RHDG_CLUSTER_NAME=rhdg
 GRAFANA_NAMESPACE=grafana
-GRAFANA_DASHBOARD_NAME="grafana-dashboard-rhdg8"
+GRAFANA_DASHBOARD_NAME="dashboard-rhdg8"
 GRAFANA_DASHBOARD_KEY="dashboard.json"
 RHDG_AUTH_ENABLED=true
 RHDG_SSL_ENABLED=false
@@ -113,27 +113,18 @@ oc process -f grafana/grafana-01-operator.yaml \
 echo -n "Waiting for pods ready..."
 while [[ $(oc get pods -l control-plane=controller-manager -n $GRAFANA_NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo -n "." && sleep 1; done; echo -n -e "  [OK]\n"
 
-# Create a Grafana configuration
-echo -e "\n[5.5/8]Creating a grafana config"
-oc process -f grafana/grafana-02-config.yaml \
-    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
-
-sleep 5
-
 # Create a Grafana instance
 echo -e "\n[6/8]Creating a grafana instance"
 oc process -f grafana/grafana-02-instance.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for ServiceAccount ready..."
-while ! oc get sa grafana-serviceaccount -n $GRAFANA_NAMESPACE &> /dev/null; do   echo -n "." && sleep 1; done; echo -n -e " [OK]\n"
+while ! oc get sa grafana-sa -n $GRAFANA_NAMESPACE &> /dev/null; do   echo -n "." && sleep 1; done; echo -n -e " [OK]\n"
 
-# --- In OCP 3.x and OCP 4.10 or lower ---
-# BEARER_TOKEN=$(oc serviceaccounts get-token grafana-serviceaccount -n $GRAFANA_NAMESPACE)
 # --- In OCP 4.11 or higher ---
 # Reason: https://access.redhat.com/solutions/2972601
 # We don't use the `oc create token` as this token expires after 15m
-BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-serviceaccount -n $GRAFANA_NAMESPACE | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
+BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-sa -n $GRAFANA_NAMESPACE | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
 
 # Create a Grafana data source
 echo -e "\n[7/8]Creating the Grafana data source"
@@ -143,27 +134,17 @@ oc process -f grafana/grafana-03-datasource.yaml \
 
 # Create the default Grafana dashboard created by the operator
 echo -e "\n[8/8]Creating the default Grafana dashboard"
-if oc get cm grafana-default-operator-dashboard -n $GRAFANA_NAMESPACE &> /dev/null; then
-    echo -e "Check. There was a previous configuration. Deleting..."
-    oc delete configmap grafana-default-operator-dashboard -n $GRAFANA_NAMESPACE
-fi
-oc create configmap grafana-default-operator-dashboard --from-file=$GRAFANA_DASHBOARD_KEY=grafana/grafana-default-operator-dashboard.json -n $GRAFANA_NAMESPACE
+
 oc process -f grafana/grafana-04-dashboard.yaml \
-    -p DASHBOARD_NAME=grafana-default-operator-dashboard \
-    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
-    -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
+  -p DASHBOARD_GZIP="$(cat grafana/grafana-default-operator-dashboard.json | gzip | base64 -w0)" \
+  -p DASHBOARD_NAME=${GRAFANA_DASHBOARD_NAME}-default | oc apply -f -
 
 # Create an extra Grafana dashboard
 echo -e "\n[8/8]Creating the custom Grafana dashboard"
-if oc get cm $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE &> /dev/null; then
-    echo -e "Check. There was a previous configuration. Deleting..."
-    oc delete configmap $GRAFANA_DASHBOARD_NAME -n $GRAFANA_NAMESPACE
-fi
-oc create configmap $GRAFANA_DASHBOARD_NAME --from-file=$GRAFANA_DASHBOARD_KEY=grafana/$GRAFANA_DASHBOARD_NAME.json -n $GRAFANA_NAMESPACE
+
 oc process -f grafana/grafana-04-dashboard.yaml \
-    -p DASHBOARD_NAME=$GRAFANA_DASHBOARD_NAME \
-    -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE \
-    -p DASHBOARD_KEY=$GRAFANA_DASHBOARD_KEY | oc apply -f -
+  -p DASHBOARD_GZIP="$(cat grafana/grafana-dashboard-rhdg8.json | gzip | base64 -w0)" \
+  -p DASHBOARD_NAME=${GRAFANA_DASHBOARD_NAME}-custom | oc apply -f -
 
 # Print Grafana credentials
 GRAFANA_ADMIN=$(oc get secret grafana-admin-credentials -n $GRAFANA_NAMESPACE -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' | base64 --decode)
