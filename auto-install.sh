@@ -86,8 +86,6 @@ oc process -f rhdg-operator/rhdg-03-caches.yaml \
     -p CLUSTER_NAMESPACE=$RHDG_NAMESPACE \
     -p CLUSTER_NAME=$RHDG_CLUSTER_NAME | oc apply -f -
 
-oc project $RHDG_NAMESPACE
-
 ##
 # 2) PROMETHEUS
 ## 
