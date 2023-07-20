@@ -20,7 +20,7 @@ objects:
     clusterName: ${CLUSTER_NAME}
     name:  operator-cache-01
     template: >-
-      <distributed-cache name="doesnotapply" owners="1" mode="ASYNC" statistics="true">
+      <distributed-cache owners="1" mode="ASYNC" statistics="true">
         <encoding media-type="application/x-protostream"/>
         <state-transfer enabled="false"/>
         <memory max-size="400MB" when-full="REMOVE"/>
