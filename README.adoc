@@ -395,7 +395,7 @@ To deploy the community-powered Grafana operator on OCP 4.13 just follow these s
 
 [source, bash]
 ----
-oc process -f grafana/grafana-01-operator.yaml | oc apply -f -
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/10-operator.yaml | oc apply -f -
 ----
 
 === Create a Grafana instance
@@ -404,7 +404,7 @@ Now, we will create a Grafana instance using the operator:
 
 [source, bash]
 ----
-oc process -f grafana/grafana-02-instance.yaml | oc apply -f -
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/20-instance.yaml | oc apply -f -
 ----
 
 === Create a Grafana data source
@@ -414,7 +414,7 @@ Now, we will create a Grafana data source:
 [source, bash]
 ----
 BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-sa -n grafana | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
-oc process -f grafana/grafana-03-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN | oc apply -f -
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/30-datasource.yaml -p BEARER_TOKEN=$BEARER_TOKEN | oc apply -f -
 ----
 
 === Create a Grafana dashboard
@@ -423,7 +423,7 @@ Now, we will create a Grafana dashboard:
 
 [source, bash]
 ----
-oc process -f grafana/grafana-04-dashboard.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/40-dashboard.yaml \
   -p DASHBOARD_GZIP="$(cat grafana/grafana-default-operator-dashboard.json | gzip | base64 -w0)" \
   -p DASHBOARD_NAME=dashboard-rhdg8-default | oc apply -f -
 ----

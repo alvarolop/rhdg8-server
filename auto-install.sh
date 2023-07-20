@@ -47,20 +47,19 @@ if ! oc whoami &> /dev/null; then
     exit 1
 else
     echo -e "Check. You are correctly logged in. Continue..."
-    oc project default # To avoid issues with deleted projects
+    if ! oc project &> /dev/null; then
+        echo -e "Current project does not exist, moving to project Default."
+        oc project default 
+    fi
 fi
 
 
 ##
 # 0) MONITORING SET UP
 ## 
-
-if ! oc get cm cluster-monitoring-config -n openshift-monitoring &> /dev/null; then
-    echo -e "Check. Cluster monitoring is missing, creating the monitoring stack..."
-    oc apply -f ocp/ocp-01-user-workload-monitoring.yaml
-else
-    echo -e "Check. Cluster monitoring is ready, do nothing."
-fi
+echo -e "\n[0/8]Configuring User Workload Monitoring"
+oc apply -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/ocp-monitoring/10-cm-cluster-monitoring-config.yaml
+oc apply -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/ocp-monitoring/11-cm-user-workload-monitoring-config.yaml
 
 ##
 # 1) RHDG
@@ -107,7 +106,7 @@ oc process -f rhdg-operator/rhdg-04-monitoring.yaml \
 
 # Deploy the Grafana Operator
 echo -e "\n[5/8]Deploying the Grafana operator"
-oc process -f grafana/grafana-01-operator.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/10-operator.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for pods ready..."
@@ -115,7 +114,7 @@ while [[ $(oc get pods -l control-plane=controller-manager -n $GRAFANA_NAMESPACE
 
 # Create a Grafana instance
 echo -e "\n[6/8]Creating a grafana instance"
-oc process -f grafana/grafana-02-instance.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/20-instance.yaml \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 echo -n "Waiting for ServiceAccount ready..."
@@ -126,23 +125,23 @@ while ! oc get sa grafana-sa -n $GRAFANA_NAMESPACE &> /dev/null; do   echo -n ".
 # We don't use the `oc create token` as this token expires after 15m
 BEARER_TOKEN=$(oc get secret $(oc describe sa grafana-sa -n $GRAFANA_NAMESPACE | awk '/Tokens/{ print $2 }') -n $GRAFANA_NAMESPACE --template='{{ .data.token | base64decode }}')
 
-# Create a Grafana data source
+# Create a Grafana datasource
 echo -e "\n[7/8]Creating the Grafana data source"
-oc process -f grafana/grafana-03-datasource.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/30-datasource.yaml \
     -p BEARER_TOKEN=$BEARER_TOKEN \
     -p OPERATOR_NAMESPACE=$GRAFANA_NAMESPACE | oc apply -f -
 
 # Create the default Grafana dashboard created by the operator
 echo -e "\n[8/8]Creating the default Grafana dashboard"
 
-oc process -f grafana/grafana-04-dashboard.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/40-dashboard.yaml \
   -p DASHBOARD_GZIP="$(cat grafana/grafana-default-operator-dashboard.json | gzip | base64 -w0)" \
   -p DASHBOARD_NAME=${GRAFANA_DASHBOARD_NAME}-default | oc apply -f -
 
 # Create an extra Grafana dashboard
 echo -e "\n[8/8]Creating the custom Grafana dashboard"
 
-oc process -f grafana/grafana-04-dashboard.yaml \
+oc process -f https://raw.githubusercontent.com/alvarolop/quarkus-observability-app/main/openshift/grafana/40-dashboard.yaml \
   -p DASHBOARD_GZIP="$(cat grafana/grafana-dashboard-rhdg8.json | gzip | base64 -w0)" \
   -p DASHBOARD_NAME=${GRAFANA_DASHBOARD_NAME}-custom | oc apply -f -
 
