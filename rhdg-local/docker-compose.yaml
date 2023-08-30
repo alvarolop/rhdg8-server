@@ -45,6 +45,6 @@ services:
       - "-c infinispan.xml"
       - "-c infinispan-europe.yaml"
 
-# networks:
-#   infinispan:
-#     driver: bridge
+networks:
+  infinispan:
+    driver: bridge
