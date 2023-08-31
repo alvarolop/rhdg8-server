@@ -1,0 +1,20 @@
+dn: dc=acme,dc=org
+objectClass: top
+objectClass: domain
+description: This organization contains users that can be used to test configuration of other products.
+
+dn: ou=people,dc=acme,dc=org
+objectClass: organizationalUnit
+description: People in Acme's organization
+
+dn: ou=groups,dc=acme,dc=org
+objectClass: organizationalUnit
+description: Groups in Acme's organization to group people
+
+dn: ou=clients,dc=acme,dc=org
+objectClass: organizationalUnit
+description: Clients in Acme's organization
+
+dn: ou=roles,dc=acme,dc=org
+objectClass: organizationalUnit
+description: Roles in Acme's organization to group clients

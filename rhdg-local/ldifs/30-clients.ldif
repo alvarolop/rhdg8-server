@@ -1,0 +1,97 @@
+dn: uid=client-01,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client One
+sn: One
+displayName: Client 01
+mail: client-01@acme.org
+userPassword: client-01
+uid: client-01
+
+dn: uid=client-02,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Two
+sn: Two
+displayName: Client 02
+mail: client-02@acme.org
+userPassword: client-02
+uid: client-02
+
+dn: uid=client-03,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Three
+sn: Three
+displayName: Client 03
+mail: client-03@acme.org
+userPassword: client-03
+uid: client-03
+
+dn: uid=client-04,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Four
+sn: Four
+displayName: Client 04
+mail: client-04@acme.org
+userPassword: client-04
+uid: client-04
+
+
+# Clients related to Role 10
+dn: uid=client-11,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Eleven
+sn: Eleven
+displayName: Client 11
+mail: client-11@acme.org
+userPassword: client-11
+uid: client-11
+
+dn: uid=client-12,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Twelve
+sn: Twelve
+displayName: Client 12
+mail: client-12@acme.org
+userPassword: client-12
+uid: client-12
+
+dn: uid=client-13,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Thirteen
+sn: Thirteen
+displayName: Client 13
+mail: client-13@acme.org
+userPassword: client-13
+uid: client-13
+
+dn: uid=client-14,ou=clients,dc=acme,dc=org
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Client Fourteen
+sn: Fourteen
+displayName: Client 14
+mail: client-14@acme.org
+userPassword: client-14
+uid: client-14

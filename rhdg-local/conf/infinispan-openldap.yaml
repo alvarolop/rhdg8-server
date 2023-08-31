@@ -1,0 +1,49 @@
+infinispan:
+  server:
+    security:
+      securityRealms:
+        - name: default
+          cacheLifespan: 0
+          cacheMaxSize: 0
+          ldapRealm:
+            url: 'ldap://localhost:1389'
+            principal: 'cn=admin,dc=acme,dc=org'
+            credential: adminpassword
+            connectionTimeout: '3000'
+            readTimeout: '30000'
+            connectionPooling: true
+            referralMode: ignore
+            pageSize: '30'
+            directVerification: true
+            identityMapping:
+              rdnIdentifier: uid
+              searchDn: 'dc=acme,dc=org'
+              searchRecursive: true
+              attributeMapping:
+                - filter: '(&(objectClass=groupOfNames)(member={1}))'
+                  filterDn: 'ou=roles,dc=acme,dc=org'
+                  from: cn
+                  to: Roles
+                - filter: '(&(objectClass=groupOfNames)(member={1}))'
+                  filterDn: 'ou=groups,dc=acme,dc=org'
+                  from: cn
+                  to: Roles
+              userPasswordMapper:
+                from: "userPassword"
+    endpoints:
+      endpoint:
+        socketBinding: default
+        securityRealm: default
+        hotrodConnector:
+          authentication:
+            sasl:
+              mechanisms:
+                - PLAIN
+              qop:
+                - auth
+        restConnector:
+          authentication:
+            securityRealm: default
+            mechanisms:
+              - DIGEST
+              - BASIC

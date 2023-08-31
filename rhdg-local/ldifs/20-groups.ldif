@@ -1,0 +1,9 @@
+dn: cn=developers,ou=groups,dc=acme,dc=org
+cn: developers
+objectclass: groupOfNames
+member: uid=user-01,ou=people,dc=acme,dc=org
+
+dn: cn=admin,ou=groups,dc=acme,dc=org
+cn: admin
+objectclass: groupOfNames
+member: uid=user-02,ou=people,dc=acme,dc=org
