@@ -17,7 +17,8 @@
     <Logger name="com.arjuna" level="WARN"/>
     <Logger name="org.jboss.threads" level="WARN"/>
 
-    <Logger name="org.infinispan.cache.impl.CacheImpl" level="TRACE"/>
+    <!-- Set the following to TRACE to check if caches are stopped -->
+    <Logger name="org.infinispan.cache.impl.CacheImpl" level="INFO"/>
 
   </Loggers>
 </Configuration>
