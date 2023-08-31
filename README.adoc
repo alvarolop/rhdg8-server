@@ -460,8 +460,32 @@ For more information, access the Grafana https://grafana.com/docs/grafana/latest
 
 
 
+== Annex A: Adding Datasource configuration
 
-== Annex: Interact with caches using REST
+.Deploy the scenario
+[source, bash]
+----
+podman-compose -f rhdg-local/docker-compose-datasource.yaml up
+----
+
+.How to check that it worked?
+[source, bash]
+----
+# Check current Databases (Should show "datagrid")
+psql postgres://rhdguser:password@localhost:5432/datagrid -c '\l'
+
+# Check cache statistics
+curl -s -k -u admin:password $RHDG_URL/rest/v2/caches/datasource-cache | yq -P .
+
+# Check DB table contents
+psql postgres://rhdguser:password@localhost:5432/datagrid -c 'SELECT * FROM "TBL_datasource_cache";'
+
+----
+
+
+
+
+== Annex B: Interact with caches using REST
 
 
 Interact with the newly created caches with the following commands:
@@ -483,7 +507,7 @@ curl -X DELETE -k ${RHDG_URL}/rest/v2/caches/${CACHE_NAME}
 ----
 
 
-== Annex: Configure the scope of your operator
+== Annex C: Configure the scope of your operator
 
 An Operator group, defined by the OperatorGroup resource, provides multitenant configuration to OLM-installed Operators. An Operator group selects target namespaces in which to generate required RBAC access for its member Operators.
 
@@ -533,7 +557,7 @@ For more information, check the Openshift https://docs.openshift.com/container-p
 
 
 
-== Annex: Stern - Tail logs from multiple pods
+== Annex D: Stern - Tail logs from multiple pods
 
 In some situations, you will need to monitor logs from several pods of the same application and maybe you want to check to which pod the request arrived. https://github.com/wercker/stern[Stern] allows you to tail multiple pods on Kubernetes and multiple containers within the pod. Each result is color coded for quicker debugging.
 
@@ -555,7 +579,7 @@ The previous command will show all the logs from all the pods from a namespace t
 
 
 
-== Annex: Advanced stats, and reporting for RHDG
+== Annex E: Advanced stats, and reporting for RHDG
 
 
 === Retrieve Queries stats
@@ -594,7 +618,7 @@ done
 
 
 
-== Annex: Convert cache configurations
+== Annex F: Convert cache configurations
 
 In Data Grid 7, caches were defined in XML format. Since RHDG 8, it is possible to use XML, JSON or YAML. The server includes some tools to automatically convert from one to the other.
 
@@ -650,7 +674,7 @@ replicatedCache:
 
 
 
-== Annex: Getting full CR example
+== Annex G: Getting full CR example
 
 1. Download the Infinispan CRD:
 +

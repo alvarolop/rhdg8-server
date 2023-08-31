@@ -1,0 +1,43 @@
+version: '3'
+services:
+
+  eu-01:
+    image: quay.io/infinispan/server:15.0
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./conf/infinispan-europe.yaml:/opt/infinispan/server/conf/infinispan-europe.yaml:Z
+      - ./conf/infinispan-datasources.yaml:/opt/infinispan/server/conf/infinispan-datasources.yaml:Z
+      - ./conf/log4j2.xml:/opt/infinispan/server/conf/log4j2.xml:Z
+      - ./lib/postgresql-42.6.0.jar:/opt/infinispan/server/lib/postgresql-42.6.0.jar:Z
+    environment:
+      USER: admin
+      PASS: password
+      ISPN_HOME: /opt/infinispan
+      JAVA_OPTIONS: "-Dinfinispan.node.name=infinispan-europe-01"
+    ports:
+      - 11222:11222
+    networks:
+      - infinispan
+    depends_on:
+      - postgresql
+    command:
+      - "-c infinispan.xml"
+      - "-c infinispan-europe.yaml"
+      - "-c infinispan-datasources.yaml"
+
+  postgresql:
+    image: registry.redhat.io/rhel9/postgresql-15
+    network_mode: host
+    environment:
+      POSTGRESQL_USER: rhdguser
+      POSTGRESQL_PASSWORD: password
+      POSTGRESQL_DATABASE: datagrid
+    ports:
+      - 5432:5432
+    networks:
+      - infinispan
+
+networks:
+  infinispan:
+    driver: bridge

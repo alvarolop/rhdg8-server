@@ -1,0 +1,53 @@
+infinispan:
+  server:
+    dataSources:
+      - name: ds
+        jndiName: 'jdbc/postgres'
+        statistics: true
+        connectionFactory:
+          driver: "org.postgresql.Driver"
+          url: "jdbc:postgresql://localhost:5432/datagrid"
+          username: "rhdguser"
+          password: "password"
+        connectionPool:
+          initialSize: 1
+          maxSize: 10
+          minSize: 3
+          backgroundValidation: 1000
+          idleRemoval: 1
+          blockingTimeout: 1000
+          leakDetection: 10000
+  cacheContainer:
+    name: default
+    statistics: true
+    caches:
+      datasource-cache:
+        distributedCache:
+          owners: "1"
+          mode: SYNC
+          statistics: "true"
+          encoding:
+            key:
+              mediaType: application/x-protostream
+            value:
+              mediaType: application/x-protostream
+          persistence:
+            stringKeyedJdbcStore:
+              dataSource:
+                jndi-url: "jdbc/postgres"
+              stringKeyedTable:
+                prefix: "TBL"
+                dropOnExit: true
+                createOnStart: true
+                idColumn:
+                  name: "ID"
+                  type: "VARCHAR(255)"
+                dataColumn:
+                  name: "DATA"
+                  type: "BYTEA"
+                timestampColumn:
+                  name: "TS"
+                  type: "BIGINT"
+                segmentColumn:
+                  name: "S"
+                  type: "INT"
