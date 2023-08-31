@@ -19,6 +19,9 @@
 
     <!-- Set the following to TRACE to check if caches are stopped -->
     <Logger name="org.infinispan.cache.impl.CacheImpl" level="INFO"/>
+    <Logger name="org.infinispan.REST_ACCESS_LOG" level="INFO"/>
 
+
+    
   </Loggers>
 </Configuration>
