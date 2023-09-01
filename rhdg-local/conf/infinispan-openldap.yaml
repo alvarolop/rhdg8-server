@@ -36,6 +36,7 @@ infinispan:
         securityRealm: default
         hotrodConnector:
           authentication:
+            securityRealm: default
             sasl:
               mechanisms:
                 - PLAIN
@@ -45,5 +46,4 @@ infinispan:
           authentication:
             securityRealm: default
             mechanisms:
-              - DIGEST
               - BASIC
