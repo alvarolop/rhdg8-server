@@ -1,0 +1,209 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: rhdg8-cluster
+  annotations:
+    description: Template to deploy a RHDG cluster on OCP.
+    tags: infinispan,datagrid,operator
+    iconClass: icon-datagrid
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+- apiVersion: infinispan.org/v1
+  kind: Infinispan
+  metadata:
+    name: ${CLUSTER_NAME}
+    namespace: ${CLUSTER_NAMESPACE}
+    annotations:
+      infinispan.org/monitoring: 'false'
+      # infinispan.org/podTargetLabels: domain
+      infinispan.org/targetLabels: domain
+    labels:
+      type: middleware
+      domain: ${CLUSTER_NAME}
+  spec:
+    # affinity:
+    #   nodeAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - preference:
+    #           matchExpressions:
+    #           matchFields:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution: 
+    #       nodeSelectorTerms:
+    #         - matchExpressions:
+    #           matchFields:
+    #   podAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - podAffinityTerm:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #         namespaces:
+    #         topologyKey:
+    #   podAntiAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #       - podAffinityTerm:
+    #         weight:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #         namespaces:
+    #         topologyKey:
+    # autoscale:
+    #   disabled:
+    #   maxMemUsagePercent:
+    #   maxReplicas:
+    #   minMemUsagePercent:
+    #   minReplicas:
+    # cloudEvents:
+    #   acks: ""
+    #   bootstrapServers: ""
+    #   cacheEntriesTopic: "" 
+    configListener:
+      enabled: true
+    configMapName: "${CLUSTER_NAME}-custom-config" 
+    container:
+      # cliExtraJvmOpts: ""
+      cpu: '2'
+      extraJvmOpts: '-Xlog:gc*=info:file=/tmp/gc.log:time,level,tags,uptimemillis:filecount=10,filesize=1m
+              -XX:+UseG1GC -XX:MaxGCPauseMillis=400'
+      memory: 3Gi
+      # routerExtraJvmOpts: ""
+    # dependencies:
+    #     artifacts:
+    #       hash: ""
+    #       maven: ""
+    #       type: ""
+    #       url: ""
+    #     volumeClaimName: ""
+    expose: 
+      annotations: {}
+      # host:
+      # nodePort:
+      # port: 80
+      type: Route
+    # image: "infinispan/server:14.0"
+    logging:
+      categories: {}
+      # categories:
+      #   org.infinispan: debug
+      #   org.jgroups: debug
+    replicas: ${{REPLICAS}}
+    security:
+      # authorization:
+      #   enabled: true
+      #   roles:
+      #     - name: ""
+      #       permissions:
+      #         - ""
+      #         - ""
+      endpointAuthentication: false
+      endpointEncryption:
+        # certSecretName: ""
+        # certServiceName: ""
+        # clientCert: ""
+        # clientCertSecretName: ""
+        type: None
+      # endpointSecretName: ${CLUSTER_NAME}-credentials
+    service:
+      container:
+        ephemeralStorage: true
+      #   storage: ""
+      #   storageClassName: ""
+      # replicationFactor: 2
+      # sites:
+      #   local:
+      #     discovery:
+      #       launchGossipRouter: false
+      #       type: ""
+      #     encryption:
+      #       protocol: ""
+      #       routerKeyStore:
+      #         alias: ""
+      #         filename: ""
+      #         secretName: ""
+      #       transportKeyStore:
+      #         alias: ""
+      #         filename: ""
+      #         secretName: ""
+      #       trustStore:
+      #         filename: ""
+      #         secretName: ""
+      #     expose:
+      #       annotations: {}
+      #       nodePort: 1
+      #       port: 1
+      #       type: ""
+      #     maxRelayNodes: 1
+      #     name:
+      #   locations:
+      #     - clusterName: ""
+      #       host: ""
+      #       name: ""
+      #       namespace: ""
+      #       port: 1
+      #       secretName: ""
+      #       url: ""
+      type: DataGrid
+    # upgrades:
+    #   type: "Shutdown"
+    # version: "8.4.0"
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: "${CLUSTER_NAME}-custom-config"
+    namespace: ${CLUSTER_NAMESPACE}
+  data:
+    infinispan-config.yaml: >
+      infinispan:
+        cache-container:
+          name: "default"
+          statistics: "true"
+          distributedCacheConfiguration:
+            name: "proto-dist-template"
+            mode: "SYNC"
+            statistics: "true"
+            encoding:
+              mediaType: "application/x-protostream"
+            expiration:
+              lifespan: "5000"
+              maxIdle: "1000"
+            memory:
+              maxCount: "1000000"
+              whenFull: "REMOVE"
+          distributedCacheConfiguration:
+            name: "jboss-dist-template"
+            mode: "ASYNC"
+            owners: "1"
+            statistics: "true"
+            encoding:
+              mediaType: "application/x-jboss-marshalling"
+            memory:
+              maxSize: "400MB"
+              whenFull: "REMOVE"
+            expiration:
+              lifespan: "300000"
+            stateTransfer:
+              enabled: false
+          distributedCache:
+            configuration: "jboss-dist-template"
+            name: "configMap-cache-01"
+          distributedCache:
+            configuration: "jboss-dist-template"
+            memory:
+              maxSize: "200MB"
+              whenFull: "REMOVE"
+            name: "configMap-cache-02"
+parameters:
+- name: CLUSTER_NAMESPACE
+  description: "The project where the RHDG cluster will be installed."
+  required: false
+  value: "rhdg8"
+- name: CLUSTER_NAME
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "rhdg"
+- name: REPLICAS
+  description: "The name of the RHDG cluster."
+  required: false
+  value: "2"
