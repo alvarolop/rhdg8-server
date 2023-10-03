@@ -188,12 +188,6 @@ objects:
           distributedCache:
             configuration: "jboss-dist-template"
             name: "configMap-cache-01"
-          distributedCache:
-            configuration: "jboss-dist-template"
-            memory:
-              maxSize: "200MB"
-              whenFull: "REMOVE"
-            name: "configMap-cache-02"
 parameters:
 - name: CLUSTER_NAMESPACE
   description: "The project where the RHDG cluster will be installed."
