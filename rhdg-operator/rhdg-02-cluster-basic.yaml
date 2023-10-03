@@ -83,6 +83,8 @@ objects:
       # port: 80
       type: Route
     # image: "infinispan/server:14.0"
+    jmx:
+      enabled: ${{JMX_ENABLED}}
     logging:
       categories: {}
       # categories:
@@ -201,3 +203,7 @@ parameters:
   description: "The name of the RHDG cluster."
   required: false
   value: "2"
+- name: JMX_ENABLED
+  description: "Enable the JMX endpoint."
+  required: false
+  value: "true"
