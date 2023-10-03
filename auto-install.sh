@@ -10,7 +10,7 @@ GRAFANA_NAMESPACE=grafana
 GRAFANA_DASHBOARD_NAME="dashboard-rhdg8"
 GRAFANA_DASHBOARD_KEY="dashboard.json"
 RHDG_AUTH_ENABLED=true
-RHDG_SSL_ENABLED=false
+RHDG_SSL_ENABLED=true
 
 #############################
 ## Do not modify anything from this line
