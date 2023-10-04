@@ -1,0 +1,47 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: cryostat-operator
+  annotations:
+    description: Template to deploy a Cryostat operator on OCP.
+    tags: cryostat,community,operator
+    iconClass: icon-cassandra
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+objects:
+
+# - kind: Cryostat
+#   apiVersion: operator.cryostat.io/v1beta1
+#   metadata:
+#     name: cryostat
+#     namespace: ${OPERATOR_NAMESPACE}
+#   spec:
+#     enableCertManager: true
+#     minimal: false
+#     reportOptions:
+#       replicas: 0
+
+- kind: ClusterCryostat
+  apiVersion: operator.cryostat.io/v1beta1
+  metadata:
+    name: clustercryostat
+    namespace: ${OPERATOR_NAMESPACE}
+  spec:
+    enableCertManager: true
+    eventTemplates: []
+    installNamespace: ${OPERATOR_NAMESPACE}
+    minimal: false
+    reportOptions:
+      replicas: 0
+    storageOptions:
+      pvc:
+        annotations: {}
+        labels: {}
+        spec: {}
+    trustedCertSecrets: []
+
+parameters:
+- name: OPERATOR_NAMESPACE
+  description: "The project where the operator will be installed."
+  required: false
+  value: "cryostat"
